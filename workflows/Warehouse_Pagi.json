@@ -1,0 +1,3137 @@
+{
+  "name": "Warehouse Pagi",
+  "nodes": [
+    {
+      "parameters": {
+        "binaryPropertyName": "=attachment_0"
+      },
+      "id": "723a48a0-54cc-47cc-9814-10850be8ae1c",
+      "name": "Compression",
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1IW4b8HRmaikPIeyPHTBnw0e7G59_q7y3",
+          "mode": "list",
+          "cachedResultName": "Rekap Harian",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1IW4b8HRmaikPIeyPHTBnw0e7G59_q7y3"
+        },
+        "options": {}
+      },
+      "id": "ede30274-2630-43af-a2e9-97547d3d4ced",
+      "name": "Create Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        128,
+        432
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const out = [];\nlet idx = 0;\nfor (const item of $('Compression').all()) {\n  const binary = item.binary || {};\n  for (const key of Object.keys(binary)) {\n    idx++;\n    out.push({\n      json: { fileName: binary[key].fileName, sheetNumber: String(idx) },\n      binary: { data: binary[key] },\n    });\n  }\n}\nreturn out;"
+      },
+      "id": "9b0fda14-7a3f-4768-9835-a72c8ab6ae87",
+      "name": "Normalize Files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "name": "={{ $json.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Create Folder').first().json.id }}"
+        },
+        "options": {}
+      },
+      "id": "79088251-e0f3-4f6b-ad1e-97dad00aed5f",
+      "name": "Upload file",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        576,
+        432
+      ],
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $('Normalize Files').all();"
+      },
+      "id": "948bfa68-6611-47cc-ae30-ac7c51b37466",
+      "name": "List Files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Copy Transaksi').first().json.id }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Loop Over Files Rekap').first().json.sheetNumber }}"
+        }
+      },
+      "id": "8c76a085-a46d-45f4-896f-e45c81680181",
+      "name": "Clear Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1472,
+        0
+      ],
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cur = $('Loop Over Files Rekap').first();\nreturn [{ json: { sheetNumber: cur.json.sheetNumber }, binary: cur.binary }];"
+      },
+      "id": "806fd98a-0e75-40bf-8f11-2ac55b8b0d19",
+      "name": "Reattach Binary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "headerRow": false,
+          "rawData": true,
+          "sheetName": "UID Pick List Report"
+        }
+      },
+      "id": "6bb908cb-5fae-485b-ab78-197ca8173a3f",
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1920,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst sheetNumber = $('Loop Over Files Rekap').first().json.sheetNumber;\nconst COLS = 25;\n\nconst values = [];\nfor (const item of items) {\n  const row = item.json.row || [];\n  const r = [];\n  for (let i = 0; i < COLS; i++) {\n    r.push(row[i] === null || row[i] === undefined ? '' : row[i]);\n  }\n  values.push(r);\n}\n\n// GIN ada di W8 (W8:X8 di-merge), baris ke-8 = index 7, kolom W = index 22\nconst gin = String(values[7]?.[22] ?? '').trim();\n\nconst processedRows = $('Read Processed Attachments').first().json.values || [];\nconst processedGINs = new Set(\n  processedRows.map(row => String(row[3] ?? '').trim()).filter(g => g !== '')\n);\n\n// kalau GIN gagal kebaca, anggap baru (aman, lanjut proses normal) daripada diam-diam skip\nconst isNewGin = gin === '' || !processedGINs.has(gin);\n\n// tab 'Rekap Calc' di file Copy Transaksi harus keisi berurutan dari tab 1 tanpa celah\n// (formula Summary-nya cuma jalan kalau data mulai dari tab 1), jadi file yang baru\n// dinomori ulang berurutan, bukan pakai posisi aslinya di dalam email.\n// Pakai scope 'global' supaya node lain (guard/notifikasi/logging setelah loop) bisa baca juga.\nconst staticData = $getWorkflowStaticData('global');\nif (sheetNumber === '1') {\n  staticData.newFileTabCounter = 0; // reset tiap awal eksekusi baru\n  staticData.duplicateFiles = [];\n  staticData.newGins = [];\n}\n\nlet sheetName = sheetNumber;\nif (isNewGin) {\n  staticData.newFileTabCounter = (staticData.newFileTabCounter || 0) + 1;\n  sheetName = String(staticData.newFileTabCounter);\n  if (gin !== '') staticData.newGins.push(gin);\n} else {\n  const fileName = $('Loop Over Files Rekap').first().json.fileName;\n  if (!staticData.duplicateFiles) staticData.duplicateFiles = [];\n  staticData.duplicateFiles.push({ fileName, gin });\n}\n\nreturn [{ json: { sheetName, values, gin, isNewGin } }];"
+      },
+      "id": "993a4676-14f9-4819-b82a-31ef66ae7c6c",
+      "name": "Build Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2144,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json; // { sheetName, values }\nconst fileName = $('Loop Over Files Rekap').first().json.fileName;\n\nfunction isEmpty(v) {\n  return v === null || v === undefined || v === '';\n}\nfunction countFilled(row) {\n  return row.filter(v => !isEmpty(v)).length;\n}\n\nconst values = data.values;\nconst HEADER_ROWS = 15; // baris info laporan (nama perusahaan, tanggal, dll), dilewati dari cek\nconst anomalies = [];\n\nfor (let i = HEADER_ROWS; i < values.length; i++) {\n  const row = values[i];\n  const filled = countFilled(row);\n  if (filled === 0) continue; // baris kosong total itu wajar (misal akhir data)\n\n  const prev = values[i - 1] ? countFilled(values[i - 1]) : 0;\n  const next = values[i + 1] ? countFilled(values[i + 1]) : 0;\n  const neighborAvg = (prev + next) / 2;\n\n  // baris ini jauh lebih \"kosong\" dibanding tetangga kiri-kanannya -> mencurigakan\n  if (filled <= 2 && neighborAvg >= 5) {\n    anomalies.push({ rowIndex: i, filled, neighborAvg, row });\n  }\n}\n\nreturn [{\n  json: {\n    ...data,\n    fileName,\n    hasAnomaly: anomalies.length > 0,\n    anomalies,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2592,
+        0
+      ],
+      "id": "941a463d-57e8-4ad7-a78c-809746c1fbb5",
+      "name": "Validate Extraction"
+    },
+    {
+      "parameters": {
+        "jsCode": "const json = $('Validate Extraction').first().json;\nif (json.hasAnomaly) {\n  const staticData = $getWorkflowStaticData('node');\n  if (!staticData.anomalyFiles) staticData.anomalyFiles = [];\n  staticData.anomalyFiles.push({\n    fileName: json.fileName,\n    sheetName: json.sheetName,\n    anomalyCount: json.anomalies.length,\n    sampleRows: json.anomalies.slice(0, 3).map(a => a.rowIndex),\n  });\n}\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3040,
+        288
+      ],
+      "id": "4cfbfec5-22ab-4009-bb2e-6fa19d1fae93",
+      "name": "Log Anomalies"
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('node');\nconst anomalyFiles = staticData.anomalyFiles || [];\n\nlet summaryText = 'Rekap Harian selesai diproses.\\n';\nif (anomalyFiles.length > 0) {\n  summaryText += '\\n⚠️ Ditemukan kemungkinan masalah format (merge cell/kolom hilang) di ' + anomalyFiles.length + ' file:\\n';\n  for (const f of anomalyFiles) {\n    summaryText += '- ' + f.fileName + ' (sheet ' + f.sheetName + '): ' + f.anomalyCount + ' baris mencurigakan, contoh baris ke-' + f.sampleRows.join(', ') + '\\n';\n  }\n  summaryText += '\\nMohon cek manual file-file di atas.';\n} else {\n  summaryText += 'Tidak ada anomali format terdeteksi.';\n}\n\nstaticData.anomalyFiles = []; // reset untuk run berikutnya\nreturn [{ json: { summaryText, hasAnomaly: anomalyFiles.length > 0 } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        384
+      ],
+      "id": "150ab46a-28c2-4674-9a54-4735cfbe909f",
+      "name": "Build Summary"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "43830dd0-bd70-4618-9d77-420e308ac5a5",
+              "leftValue": "={{ $json.hasAnomaly }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2144,
+        384
+      ],
+      "id": "c04be7da-6eca-489d-a654-8b5d7f6d6c6e",
+      "name": "Ada Anomali?"
+    },
+    {
+      "parameters": {
+        "sendTo": "testerwhsl@gmail.com",
+        "subject": "⚠️ Rekap Harian - Perlu Cek Manual",
+        "message": "={{ $json.summaryText }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2368,
+        384
+      ],
+      "id": "f6cb83ce-52d8-443a-9e5d-9215eb353aaa",
+      "name": "Send Notification Email",
+      "webhookId": "248db955-242d-44f0-9d14-be5af80895e4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8U48AonBtBxubvMr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Search Cutoff Ready File').first().json.id }}",
+          "mode": "id"
+        },
+        "name": "={{ \"Starts 9 Dec 2025 (CUTOFF \" + $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') + \")\" }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1920,
+        768
+      ],
+      "id": "7b463b4b-98fd-41a0-969b-183df4fddab9",
+      "name": "Copy Cutoff Template",
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "1kUgy-NaMk_ZCaMRqEJ5VkW1XMuOS0S7gzHsc2jd6HCA",
+          "mode": "id"
+        },
+        "name": "={{ 'Transaksi ' + $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') }}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1x31I-yBm1mXLlfGGe7pjDITpAU9ZzQ6q",
+          "mode": "list",
+          "cachedResultName": "Transaksi Harian",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1x31I-yBm1mXLlfGGe7pjDITpAU9ZzQ6q"
+        },
+        "options": {}
+      },
+      "id": "25187fc4-7634-40b6-97bb-967f8045d497",
+      "name": "Copy Transaksi",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        800,
+        432
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Transaksi').first().json.id + '/values/Summary!A2:I2000' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2144,
+        768
+      ],
+      "id": "5b091b1b-be43-46b7-ad3b-5d555a4bc2da",
+      "name": "Read Transaksi Summary",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $json.values || [];\nconst trimmed = [];\nconst missingBarcodes = [];\n\nfor (const row of rows) {\n  const nama = row[3]; // kolom D\n  if (nama === undefined || nama === null || String(nama).trim() === '' || String(nama).trim().toUpperCase() === '#N/A') {\n    break;\n  }\n  \n  const barcode = row[2]; // kolom C (Barcode)\n  if (String(barcode).trim().toUpperCase() === '#N/A') {\n    missingBarcodes.push({ gin: row[0], pc: row[1], nama: row[3] });\n  }\n  \n  trimmed.push(row);\n}\n\nconst hasMissingBarcode = missingBarcodes.length > 0;\nlet htmlTable = '';\nif (hasMissingBarcode) {\n  htmlTable = `\n    <p>Ditemukan <b>${missingBarcodes.length}</b> baris dengan Barcode tidak terdaftar di Master (Transaksi Summary):</p>\n    <table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse:collapse; font-family:Arial, sans-serif; font-size:13px;\">\n      <tr style=\"background-color:#f2f2f2;\"><th>GIN</th><th>PC</th><th>Nama Barang</th></tr>\n      ${missingBarcodes.map(m => `<tr><td>${m.gin}</td><td>${m.pc}</td><td>${m.nama}</td></tr>`).join('')}\n    </table>\n    <p>Mohon lengkapi Barcode untuk barang-barang di atas di Master.</p>\n  `;\n}\n\nreturn [{ json: { rows: trimmed, hasMissingBarcode, htmlTable } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2368,
+        768
+      ],
+      "id": "c43ac401-003f-4f2c-94d9-2bd6de38ceab",
+      "name": "Trim Until N/A"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Cutoff Template').first().json.id + '/values/' + encodeURIComponent('Rekap Harian!A2:I') + ':clear' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2816,
+        960
+      ],
+      "id": "e40986dc-a106-4e7c-a7dd-781d82a792e3",
+      "name": "Clear Rekap Harian",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Cutoff Template').first().json.id + '/values/' + encodeURIComponent(\"Rekap Harian!A2\") }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $('Fix Barcode Number (Rekap Harian)').first().json.values }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3040,
+        1008
+      ],
+      "id": "2e9c205a-4a14-4868-b395-a8515666702c",
+      "name": "Write Rekap Harian",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "1O5W0ujHYa9AHpWyBHZars0I_GylmICYmqGlaBIamo10",
+          "mode": "list",
+          "cachedResultName": "Template Pengambilan",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1O5W0ujHYa9AHpWyBHZars0I_GylmICYmqGlaBIamo10/edit?usp=drivesdk"
+        },
+        "name": "={{ \"Pengambilan \" + $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') }}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1-n-zOK6j5My_hIBQkq7WajYBx-qgBAHD",
+          "mode": "list",
+          "cachedResultName": "Pengambilan Barang",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1-n-zOK6j5My_hIBQkq7WajYBx-qgBAHD"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3264,
+        912
+      ],
+      "id": "bb1a4688-4d4f-4fcf-a13b-e19748f18527",
+      "name": "Copy Template Pengambilan",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Cutoff Template').first().json.id + '/values/' + encodeURIComponent('calc!A1:H2000') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3488,
+        912
+      ],
+      "id": "6d0d2ab2-0aa3-4a30-b1ce-d78a9b78d0a2",
+      "name": "Read Cutoff Calc",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Pengambilan').first().json.id + '/values/' + encodeURIComponent('calc!A1:H2000') + ':clear' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4160,
+        912
+      ],
+      "id": "82cbbff8-e03b-43d0-8157-ddb3599e8b2e",
+      "name": "Clear Pengambilan Calc",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Pengambilan').first().json.id + '/values/' + encodeURIComponent('calc!A1') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $('Filter H Not Zero').first().json.values }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4384,
+        912
+      ],
+      "id": "4801728d-4b41-4695-83b5-5a97008fea5d",
+      "name": "Write Pengambilan Calc",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $json.rows;\n\nfunction toNumberIfPossible(v) {\n  if (v === undefined || v === null || v === '') return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\nconst NUMERIC_COLS = [1, 2, 4, 5, 6, 7, 8]; // B, C, E, F, G, H, I (A=GIN dan D=nama dilewati, tetap teks)\n\nconst fixed = rows.map(row => {\n  const r = [...row];\n  for (const col of NUMERIC_COLS) {\n    if (col < r.length) {\n      r[col] = toNumberIfPossible(r[col]);\n    }\n  }\n  return r;\n});\n\nreturn [{ json: { values: fixed } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2592,
+        960
+      ],
+      "id": "e023bb0e-2a51-4b71-ac8d-edfa3576dd66",
+      "name": "Fix Barcode Number (Rekap Harian)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const values = $json.values || [];\n\nfunction isEmpty(v) {\n  return v === null || v === undefined || v === '';\n}\n\nfunction toNumberIfPossible(v) {\n  if (isEmpty(v)) return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\nconst NUMERIC_COLS = [0, 2, 6, 7]; // A, C, G, H\n\nconst fixed = values.map((row, i) => {\n  if (i < 2) return row; // baris 1 (tanggal) & baris 2 (header) tidak diutak-atik\n  const r = [...row];\n  for (const col of NUMERIC_COLS) {\n    if (col < r.length) {\n      r[col] = toNumberIfPossible(r[col]);\n    }\n  }\n  return r;\n});\n\nreturn [{ json: { values: fixed } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3712,
+        912
+      ],
+      "id": "d37dc884-e3d6-4928-bd8f-990c3c07a637",
+      "name": "Fix Barcode Number (Calc)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const values = $json.values || [];\n\nconst filtered = values.filter((row, i) => {\n  if (i < 2) return true; // baris tanggal & header selalu ikut\n  const h = Number(row[7]);\n  return h !== 0 || isNaN(h);\n});\n\n// pisahkan 2 baris atas (tanggal + header) dari data supaya tidak ikut ke-sort\nconst headerRows = filtered.slice(0, 2);\nconst dataRows = filtered.slice(2);\n\n// urutkan berdasarkan Description (kolom B, index 1), A-Z\ndataRows.sort((a, b) => String(a[1] || '').localeCompare(String(b[1] || '')));\n\nreturn [{ json: { values: [...headerRows, ...dataRows] } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3936,
+        912
+      ],
+      "id": "14976a0f-d4cd-45ef-876a-81c1a42cddb4",
+      "name": "Filter H Not Zero"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Pengambilan').first().json.id + '/values/' + encodeURIComponent('calc!A1:I2000') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4608,
+        1376
+      ],
+      "id": "80fb651d-be69-486d-9eb4-eccb5997c91c",
+      "name": "Read Calc + Personel",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const values = $json.values || [];\nconst dateRow = values[0] || [];   // baris \"Transaksi tanggal : ...\"\nconst header = values[1] || [];    // baris judul kolom (Barcode, Description, dst.)\n\nconst groups = {};\nfor (let i = 2; i < values.length; i++) {\n  const row = values[i];\n  if (!row || row.length === 0) continue;\n  const personel = row[8]; // kolom I\n  if (personel === undefined || personel === null || personel === '') continue;\n  const key = String(personel).trim();\n  if (!groups[key]) groups[key] = [];\n  groups[key].push(row.slice(0, 8));\n}\n\nconst items = Object.keys(groups).map(name => ({\n  json: { sheetName: name, values: [dateRow.slice(0, 8), header, ...groups[name]] }\n}));\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4832,
+        1472
+      ],
+      "id": "4bff0517-5217-4d66-89dc-57470a8d9fab",
+      "name": "Group By Personel"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        5056,
+        1376
+      ],
+      "id": "041a45a4-3b1c-4b04-bd07-b1136bfb6394",
+      "name": "Loop Personel Sheets"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Pengambilan').first().json.id + '/values/' + encodeURIComponent($json.sheetName + '!A1:H2000') + ':clear' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        5280,
+        1296
+      ],
+      "id": "3a091678-07a2-46b3-b7b0-dd264dfb1235",
+      "name": "Clear Personel Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Pengambilan').first().json.id + '/values/' + encodeURIComponent($('Loop Personel Sheets').first().json.sheetName + '!A1') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $('Loop Personel Sheets').first().json.values }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        5504,
+        1376
+      ],
+      "id": "73abfd33-dff8-42d1-afe2-d8714e1acb33",
+      "name": "Write Personel Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bf861a37-095c-4533-8d7d-dc06ce635579",
+              "leftValue": "={{ $json.hasMissing }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5056,
+        1104
+      ],
+      "id": "36937c81-5410-4200-814d-c781e9fa1b97",
+      "name": "Ada Barcode Hilang?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const values = $json.values || [];\nconst missing = [];\n\nfor (let i = 2; i < values.length; i++) { // skip baris tanggal & header\n  const row = values[i];\n  if (!row || row.length === 0) continue;\n\n  const barcode = row[0];\n  if (barcode === undefined || barcode === null || String(barcode).trim() === '') continue; // lewati baris kosong (cuma formula, tidak ada data asli)\n\n  const personel = row[8]; // kolom I\n  if (String(personel).trim() === 'Tidak Ada') {\n    missing.push({ barcode, description: row[1] });\n  }\n}\n\nlet summaryText = '';\nif (missing.length > 0) {\n  summaryText = 'Ditemukan ' + missing.length + ' barcode masuk kategori \"Tidak Ada\" (Personel tidak ketemu):\\n\\n';\n  for (const m of missing) {\n    summaryText += '- ' + m.barcode + ' (' + (m.description || 'nama tidak diketahui') + ')\\n';\n  }\n}\n\nreturn [{ json: { missing, hasMissing: missing.length > 0, summaryText } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4832,
+        1104
+      ],
+      "id": "4b2f24db-9e8d-428f-b3d0-1bada9cb7b47",
+      "name": "Check Missing Barcodes"
+    },
+    {
+      "parameters": {
+        "sendTo": "testerwhsl@gmail.com",
+        "subject": "⚠️ Alamat Tidak Lengkap Di Calc",
+        "message": "={{ $json.summaryText }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        5280,
+        1104
+      ],
+      "id": "c1dc362d-92b4-42ae-82eb-046f822f376e",
+      "name": "Send Missing Barcode Email",
+      "webhookId": "72079ff2-17bd-4737-906a-2d8de7dcee3c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8U48AonBtBxubvMr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "2c740dab-5812-4002-9063-80562ed77048",
+      "name": "Loop Over Files Rekap",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1248,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "17liUNvCeFFKDJiUjAd2yi5k0yFlZM1PzCSUbs_aWClI",
+          "mode": "list",
+          "cachedResultName": "Template Telian Pengambilan",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17liUNvCeFFKDJiUjAd2yi5k0yFlZM1PzCSUbs_aWClI/edit?usp=drivesdk"
+        },
+        "name": "={{ \"Telian Pengambilan \" + $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') }}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1cLfQHJkg4fw2XKzqHwEEPLDhmWYoNLi2",
+          "mode": "list",
+          "cachedResultName": "Telian Pengambilan",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1cLfQHJkg4fw2XKzqHwEEPLDhmWYoNLi2"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5056,
+        1616
+      ],
+      "id": "7f5f28a0-2f3b-4459-9650-5ed2b04fd25b",
+      "name": "Copy Template Telian",
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $('Group By Personel').all();\nconst output = [];\n\nfor (const item of items) {\n  const sheetName = item.json.sheetName;\n  if (sheetName === 'Tidak Ada') continue; // sheet ini tidak ada di template Telian\n\n  const dataRows = item.json.values.slice(2); // lewati baris tanggal & header\n  const telianRows = dataRows.map(row => row.slice(0, 8)); // copy utuh kolom A-H\n\n  output.push({ json: { sheetName, values: telianRows } });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5280,
+        1616
+      ],
+      "id": "2f7fc133-5df7-4a64-aa4e-88f4c2cbdeea",
+      "name": "Build Telian Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "function toNumberIfPossible(v) {\n  if (v === undefined || v === null || v === '') return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\nconst items = $input.all();\nreturn items.map(item => {\n  const rows = item.json.values.map(row => {\n    const r = [...row];\n    r[0] = toNumberIfPossible(r[0]); // Barcode\n    r[7] = toNumberIfPossible(r[7]); // Jumlah (H)\n    return r;\n  });\n  return { json: { sheetName: item.json.sheetName, values: rows } };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5504,
+        1616
+      ],
+      "id": "dea18d0d-6b40-4240-858d-86ab4a084fd6",
+      "name": "Fix Number (Telian)"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        5728,
+        1616
+      ],
+      "id": "5d6362ab-9e22-4c0e-bfca-593639429c6a",
+      "name": "Loop Telian Sheets"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Telian').first().json.id + '/values/' + encodeURIComponent($('Loop Telian Sheets').first().json.sheetName + '!A3:H2000') + ':clear' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        5952,
+        1056
+      ],
+      "id": "1896fe93-5618-4495-9780-14b2efcceed2",
+      "name": "Clear Telian Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Telian').first().json.id + '/values/' + encodeURIComponent($('Loop Telian Sheets').first().json.sheetName + '!A3') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $('Loop Telian Sheets').first().json.values }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        6176,
+        1616
+      ],
+      "id": "70d68f65-f0c2-45ce-a8e0-9e930d81b8e1",
+      "name": "Write Telian Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Transaksi').first().json.id + '/values/' + encodeURIComponent($json.sheetName + '!A1') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $json.values }) }}",
+        "options": {}
+      },
+      "id": "5897fe5c-4e9a-4a3a-a488-cbc11515676a",
+      "name": "Write Rekap Calc",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2816,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "127rqVNYh6uCJ1iqSefC7nS89qOOMFR9mV4h92QkDupY",
+          "mode": "list",
+          "cachedResultName": "Template Penyiapan",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/127rqVNYh6uCJ1iqSefC7nS89qOOMFR9mV4h92QkDupY/edit?usp=drivesdk"
+        },
+        "name": "={{ \"Penyiapan \" + $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') }}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1ZLRN2uCgSsE-zHIBh9fGyNMcqG1p4M7N",
+          "mode": "list",
+          "cachedResultName": "Penyiapan Barang",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1ZLRN2uCgSsE-zHIBh9fGyNMcqG1p4M7N"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3264,
+        432
+      ],
+      "id": "9473b83b-9332-4534-8c6e-cc06580a53e9",
+      "name": "Copy Template Penyiapan",
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Penyiapan').first().json.id + '/values/' + encodeURIComponent('Rekap Harian!A1') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: [[ $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') ]] }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3488,
+        432
+      ],
+      "id": "d86fb6a3-8f53-4659-84f8-009d4b3f70ec",
+      "name": "Write A1 Penyiapan",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Cutoff Template').first().json.id + '/values/' + encodeURIComponent('Rekap Harian!A2:K5000') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3712,
+        432
+      ],
+      "id": "d04b6caa-afe7-4461-a337-85ce532ee9be",
+      "name": "Read Cutoff Rekap Harian",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $json.values || [];\nconst trimmed = [];\n\nfor (const row of rows) {\n  const gin = row[0];\n  if (gin === undefined || gin === null || String(gin).trim() === '') break;\n  trimmed.push(row.slice(0, 11));\n}\n\nconst filtered = trimmed.filter(row => Number(row[8]) !== 0);\n\nfunction alamatToKey(v) {\n  const s = String(v).trim();\n  if (s === '' || s.toUpperCase().includes('N/A')) return [Infinity]; // taruh di paling akhir\n  return s.split('.').map(n => {\n    const num = Number(n);\n    return isNaN(num) ? Infinity : num;\n  });\n}\n\nfunction compareAlamat(a, b) {\n  const pa = alamatToKey(a);\n  const pb = alamatToKey(b);\n  const len = Math.max(pa.length, pb.length);\n  for (let i = 0; i < len; i++) {\n    const va = pa[i] ?? 0;\n    const vb = pb[i] ?? 0;\n    if (va !== vb) return va - vb;\n  }\n  return 0;\n}\n\nfiltered.sort((a, b) => compareAlamat(a[9], b[9]));\n\nreturn [{ json: { values: filtered } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3936,
+        432
+      ],
+      "id": "be8784b2-d0b9-47d6-9f69-458271310b2c",
+      "name": "Trim Rekap Harian Data"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Penyiapan').first().json.id + '/values/' + encodeURIComponent('Rekap Harian!A49:K5049') + ':clear' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4160,
+        336
+      ],
+      "id": "1932841a-1d10-4d18-9796-6c5a94fd8ba3",
+      "name": "Clear Penyiapan Rekap Harian",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Penyiapan').first().json.id + '/values/' + encodeURIComponent('Rekap Harian!A49') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $('Trim Rekap Harian Data').first().json.values }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4384,
+        336
+      ],
+      "id": "406c665c-3f41-46c2-a4bb-e1797da2918e",
+      "name": "Write Penyiapan Rekap Harian",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Penyiapan').first().json.id + '?fields=sheets.properties' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4608,
+        336
+      ],
+      "id": "63970dbc-adec-4975-8af8-3d40d34af6eb",
+      "name": "Get Penyiapan Sheet Metadata",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Penyiapan').first().json.id + ':batchUpdate' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ (() => {\n  const sheetId = $json.sheets.find(s => s.properties.title === 'Rekap Harian').properties.sheetId;\n  return JSON.stringify({\n    requests: [\n      { updateDimensionProperties: { range: { sheetId, dimension: 'COLUMNS', startIndex: 4, endIndex: 6 }, properties: { hiddenByUser: true }, fields: 'hiddenByUser' } },\n      { updateDimensionProperties: { range: { sheetId, dimension: 'COLUMNS', startIndex: 8, endIndex: 9 }, properties: { hiddenByUser: true }, fields: 'hiddenByUser' } }\n    ]\n  });\n})() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4832,
+        336
+      ],
+      "id": "22823666-6894-4add-b690-ea4b672168fd",
+      "name": "Hide Columns E F I",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Pengambilan').first().json.id + '/values/' + encodeURIComponent('calc!A3:H3000') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        4608,
+        912
+      ],
+      "id": "b443321e-09bb-40aa-bf02-c27246386455",
+      "name": "Read Pengambilan Calc For Penerimaan",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Cutoff Template').first().json.id + '/values/' + encodeURIComponent(\"'Penerimaan barang'!A:A\") }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        4832,
+        912
+      ],
+      "id": "ee30597a-5637-41cb-9a92-145564460580",
+      "name": "Find Last Row Penerimaan Barang",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const calcRows = $('Read Pengambilan Calc For Penerimaan').first().json.values || [];\nconst lastRowData = $json.values || [];\nconst nextRow = lastRowData.length + 1;\n\nfunction toNumberIfPossible(v) {\n  if (v === undefined || v === null || v === '') return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\nconst trimmed = [];\nfor (const row of calcRows) {\n  const barcode = row[0];\n  if (barcode === undefined || barcode === null || String(barcode).trim() === '') break;\n  trimmed.push(row.slice(0, 8));\n}\n\nconst NUMERIC_COLS = [0, 2, 6, 7];\nconst fixedRows = trimmed.map(row => {\n  const r = [...row];\n  for (const col of NUMERIC_COLS) r[col] = toNumberIfPossible(r[col]);\n  return r;\n});\n\nconst attachmentName = $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '');\n\nconst finalRows = fixedRows.map((row, i) => {\n  const isFirst = i === 0;\n  return [...row, '', '', isFirst ? attachmentName : ''];\n});\n\nreturn [{ json: { values: finalRows, nextRow } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5056,
+        912
+      ],
+      "id": "dcb51bbc-335a-42a4-893c-42b1156f225d",
+      "name": "Build Penerimaan Rows"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Cutoff Template').first().json.id + '/values/' + encodeURIComponent(\"'Penerimaan barang'!A\" + $json.nextRow) }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $json.values }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        5280,
+        912
+      ],
+      "id": "dae385b3-c1cf-44b5-882b-d317e02b2c85",
+      "name": "Write Penerimaan Barang",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Cutoff Template').first().json.id + '/values/' + encodeURIComponent(\"Penjualan!A:A\") }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        4608,
+        720
+      ],
+      "id": "3361eae7-644e-462b-8303-b4060a30860e",
+      "name": "Find Last Row Penjualan",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rekapRows = $('Read Cutoff Rekap Harian').first().json.values || [];\nconst lastRowData = $json.values || []; // dari Find Last Row Penjualan\nconst nextRow = lastRowData.length + 1;\n\nfunction toNumberIfPossible(v) {\n  if (v === undefined || v === null || v === '') return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\n// ambil A:J saja (10 kolom), stop di baris pertama yang GIN-nya kosong\nconst trimmed = [];\nfor (const row of rekapRows) {\n  const gin = row[0];\n  if (gin === undefined || gin === null || String(gin).trim() === '') break;\n  trimmed.push(row.slice(0, 10)); // A sampai J\n}\n\n// paksa kolom angka (B,C,E,F,G,H,I) jadi number murni -- tidak ada tanda petik\nconst NUMERIC_COLS = [1, 2, 4, 5, 6, 7, 8];\nconst fixedRows = trimmed.map(row => {\n  const r = [...row];\n  for (const col of NUMERIC_COLS) r[col] = toNumberIfPossible(r[col]);\n  return r;\n});\n\nconst attachmentName = $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '');\n\n// tanggal di kolom K, cuma diisi di BARIS PERTAMA\nconst finalRows = fixedRows.map((row, i) => {\n  const isFirst = i === 0;\n  return [...row, isFirst ? attachmentName : ''];\n});\n\nreturn [{ json: { values: finalRows, nextRow } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4832,
+        720
+      ],
+      "id": "27ba1a7e-9950-4b6a-889e-76fc511d7c21",
+      "name": "Build Penjualan Rows"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Cutoff Template').first().json.id + '/values/' + encodeURIComponent(\"Penjualan!A\" + $json.nextRow) }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $json.values }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        5056,
+        720
+      ],
+      "id": "6a520d4e-1ac9-4b8e-be20-9843ea93b267",
+      "name": "Write Penjualan",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $json.values || []; // dari Trim Rekap Harian Data, kolom A-K (index 0-10)\nconst naItems = [];\n\nfor (const row of rows) {\n  const alamat = row[9]; // kolom J\n  if (String(alamat).trim() === '#N/A') {\n    naItems.push({\n      gin: row[0],\n      pc: row[1],\n      barcode: row[2],\n      nama: row[3],\n    });\n  }\n}\n\nconst attachmentName = $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '');\n\nlet htmlTable = '';\nif (naItems.length > 0) {\n  htmlTable = `\n    <p>Ditemukan <b>${naItems.length}</b> barang dengan Alamat tidak ketemu (#N/A) di file Penyiapan ${attachmentName}:</p>\n    <table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse:collapse; font-family:Arial, sans-serif; font-size:13px;\">\n      <tr style=\"background-color:#f2f2f2;\">\n        <th>GIN</th><th>PC</th><th>Barcode</th><th>Nama Barang</th>\n      </tr>\n      ${naItems.map(item => `\n      <tr>\n        <td>${item.gin}</td>\n        <td>${item.pc}</td>\n        <td>${item.barcode}</td>\n        <td>${item.nama}</td>\n      </tr>`).join('')}\n    </table>\n    <p>Mohon lengkapi data Master untuk barang-barang di atas.</p>\n  `;\n}\n\nreturn [{ json: { naItems, hasNA: naItems.length > 0, htmlTable, attachmentName } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4160,
+        528
+      ],
+      "id": "db358493-1656-41a4-ba60-0db4ef50dc2f",
+      "name": "Check NA Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "21e170ad-68c3-4616-94bd-47417a054df0",
+              "leftValue": "={{ $json.hasNA }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4384,
+        528
+      ],
+      "id": "d800744a-5ee2-4cae-a160-7ac4bdb026f5",
+      "name": "Ada Item NA?"
+    },
+    {
+      "parameters": {
+        "sendTo": "testerwhsl@gmail.com",
+        "subject": "={{ '⚠️ Alamat #N/A di Rekap Harian - Penyiapan ' + $json.attachmentName }}",
+        "message": "={{ $json.htmlTable }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        4608,
+        528
+      ],
+      "id": "f02f85e9-e600-4c3b-9679-b5c577afaeaa",
+      "name": "Send NA Notification Email",
+      "webhookId": "977b66a0-fb81-4d9d-a55e-b76e2d5fe707",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8U48AonBtBxubvMr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ 'Starts 9 Dec 2025 (CUTOFF ' + $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') + ') Ready' }}",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1l7WIEBEVuf8zkuLo0QZNc4LmiCcEiMNU",
+            "mode": "list",
+            "cachedResultName": "File Cutoff",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1l7WIEBEVuf8zkuLo0QZNc4LmiCcEiMNU"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -544,
+        336
+      ],
+      "id": "8d087e70-966c-418b-8609-e2daeb11e91d",
+      "name": "Search Cutoff Ready File",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const trigger = $('Gmail Trigger').first();\nreturn [{ json: trigger.json, binary: trigger.binary }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        336
+      ],
+      "id": "33a77a58-ace0-4880-96a1-d4c10bdad42a",
+      "name": "Reattach Binary For Compression"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e14fc481-698d-45b0-8a14-af1ae62116d1",
+              "leftValue": "={{ $json.hasMissingBarcode }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2592,
+        672
+      ],
+      "id": "4af388c2-e6e2-49c2-b31f-b499d27315ac",
+      "name": "Ada PC Tidak Terdaftar?"
+    },
+    {
+      "parameters": {
+        "sendTo": "testerwhsl@gmail.com",
+        "subject": "⚠️ Barcode Tidak Terdaftar di Master - Transaksi Summary",
+        "message": "={{ $json.htmlTable }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2816,
+        672
+      ],
+      "id": "ccf69af3-f36f-4e2f-8b17-a8af9aa46088",
+      "name": "Send Missing PC Email",
+      "webhookId": "9e08bbfc-d56d-4db3-9aec-f95707be0aa7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8U48AonBtBxubvMr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/Locks!A1:B1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: [[\"WarehousePagiStatus\", new Date().toISOString()]] }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -96,
+        240
+      ],
+      "id": "34a0c63e-f47c-4b90-8efd-624bbd437289",
+      "name": "Set Lock Running",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/ActiveCutoff!A1:B1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: [[ $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', ''), $('Copy Cutoff Template').first().json.id ]] }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2144,
+        960
+      ],
+      "id": "e2609a22-0f1f-40b8-9090-31f33b4a712e",
+      "name": "Set Active Cutoff",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "1WzlexdgJ2tKDwDBlp6ZqH1SySAogJKx7pmXZf3eFGPg",
+          "mode": "list",
+          "cachedResultName": "Template Telian Penyiapan",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WzlexdgJ2tKDwDBlp6ZqH1SySAogJKx7pmXZf3eFGPg/edit?usp=drivesdk"
+        },
+        "name": "={{ \"Telian Penyiapan \" + $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') }}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1TsEPTlS6B0EEvwbwZj4Dvhwo_8Bgiu3y",
+          "mode": "list",
+          "cachedResultName": "Telian Penyiapan",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1TsEPTlS6B0EEvwbwZj4Dvhwo_8Bgiu3y"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5056,
+        336
+      ],
+      "id": "cf5fbe27-e693-421e-901e-89d48bef17d4",
+      "name": "Copy Template Telian Penyiapan",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Penyiapan').first().json.id + '/values/' + encodeURIComponent('Rekap Harian!A1') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        5280,
+        336
+      ],
+      "id": "5aec56ca-93f0-4113-a3a4-58c58171c4d1",
+      "name": "Read Penyiapan A1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Penyiapan').first().json.id + '/values/' + encodeURIComponent('Rekap Harian!A49:K5000') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        5504,
+        336
+      ],
+      "id": "95c27854-78e8-4a54-9900-11807ea92b1d",
+      "name": "Read Penyiapan Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function toNumberIfPossible(v) {\n  if (v === undefined || v === null || v === '') return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\nconst rows = $json.values || [];\nconst trimmed = [];\n\nfor (const row of rows) {\n  const gin = row[0]; // kolom A\n  if (gin === undefined || gin === null || String(gin).trim() === '') break;\n  trimmed.push(row.slice(0, 11)); // A sampai K = 11 kolom\n}\n\n// urutkan berdasarkan kolom A (Gin), kecil ke besar\ntrimmed.sort((a, b) => String(a[0]).localeCompare(String(b[0]), undefined, { numeric: true }));\n\n// paksa kolom angka (B,C,E,F,G,H,I) jadi number murni -- A/D/J/K tetap teks\nconst NUMERIC_COLS = [1, 2, 4, 5, 6, 7, 8];\nconst fixed = trimmed.map(row => {\n  const r = [...row];\n  for (const col of NUMERIC_COLS) r[col] = toNumberIfPossible(r[col]);\n  return r;\n});\n\nreturn [{ json: { values: fixed } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5728,
+        336
+      ],
+      "id": "26caea0c-b660-4690-a4c9-9c356b553777",
+      "name": "Trim And Sort Penyiapan Data"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Telian Penyiapan').first().json.id + '/values/' + encodeURIComponent('Rekap Harian!K1') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $('Read Penyiapan A1').first().json.values }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        5952,
+        336
+      ],
+      "id": "8f4199d1-002b-47f1-b599-6d8c27e20bff",
+      "name": "Write Telian Tanggal",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Telian Penyiapan').first().json.id + '/values/' + encodeURIComponent('Rekap Harian!A3:K5000') + ':clear' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        6176,
+        336
+      ],
+      "id": "baa1caaf-8317-4e43-8dd9-8028248c7991",
+      "name": "Clear Telian Rekap Harian",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Copy Template Telian Penyiapan').first().json.id + '/values/' + encodeURIComponent('Rekap Harian!A3') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $('Trim And Sort Penyiapan Data').first().json.values }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        6400,
+        336
+      ],
+      "id": "8d3ed145-07bb-4273-9391-45e05de103f6",
+      "name": "Write Telian Rekap Harian",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/ProcessedAttachments!A:E",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -1216,
+        432
+      ],
+      "id": "aa099c0d-330f-484f-9c3b-9d08793e9d91",
+      "name": "Read Processed Attachments",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const processedRows = $json.values || [];\nconst actual = $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '');\n\nconst alreadyProcessed = processedRows.some(row => row[0] === actual);\n\nreturn [{ json: { isValid: !alreadyProcessed, attachmentName: actual } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -992,
+        432
+      ],
+      "id": "7749765d-2994-47a3-9a67-45bb30d19465",
+      "name": "Validate Email Attachment"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "785a3311-41e6-43f2-9307-489595680b13",
+              "leftValue": "={{ $json.isValid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -768,
+        432
+      ],
+      "id": "9f23e7cd-3f95-47dd-9bba-8191765aa2b2",
+      "name": "Attachment Valid?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/ProcessedAttachments!A:B:append",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            },
+            {
+              "name": "insertDataOption",
+              "value": "OVERWRITE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: [[ $('Validate Email Attachment').first().json.attachmentName, new Date().toISOString() ]] }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3264,
+        1104
+      ],
+      "id": "932ed385-8636-4c1a-bb52-e9e0de2a2303",
+      "name": "Log Processed Attachment",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "testerwhsl@gmail.com",
+        "subject": "={{ '⚠️ Attachment Duplikat Terdeteksi - ' + $json.attachmentName }}",
+        "message": "={{ 'Email masuk dengan nama attachment \"' + $json.attachmentName + '\" TAPI attachment ini SUDAH PERNAH diproses sebelumnya. Workflow dihentikan untuk mencegah data duplikat/salah. Mohon cek apakah ini kesalahan penamaan di email pengirim, atau memang email yang keliru terkirim ulang.' }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -544,
+        528
+      ],
+      "id": "5c586582-76f1-480b-9fc5-205636f69a70",
+      "name": "Send Duplicate Attachment Email",
+      "webhookId": "88132316-bc87-4ec9-8dd4-f10ada5480bb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8U48AonBtBxubvMr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "testerwhsl@gmail.com",
+        "subject": "✅ Warehouse Pagi Sudah Diproses",
+        "message": "Proses Warehouse Pagi hari ini sudah dimulai dan file Cutoff aktif sudah dibuat.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2368,
+        960
+      ],
+      "id": "ceebe093-ab8e-4956-8510-5fce1f267107",
+      "name": "Send Completion Email",
+      "webhookId": "c3dd877b-fbe3-46a2-8c44-d48ce94703a0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8U48AonBtBxubvMr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/30 16-23 * * *"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "30,45 8 * * *"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "*/15 9 * * *"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "0 10 * * *"
+            }
+          ]
+        }
+      },
+      "id": "a9b43fce-79ae-48f7-a839-3821e662e2a4",
+      "name": "Retry Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1664,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 1,
+        "simple": false,
+        "filters": {
+          "q": "'subject:\"REKAP BARANG\"'",
+          "readStatus": "both",
+          "sender": "lumintusubur3@gmail.com"
+        },
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "attachment_",
+          "downloadAttachments": true
+        }
+      },
+      "id": "d63356da-8987-4e63-a817-b9cd117766af",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -1440,
+        432
+      ],
+      "webhookId": "33f2da38-de28-4bd7-9ad4-1485e0441645",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8U48AonBtBxubvMr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c3d4e5f6-2222-4b3c-8d4e-000000000002",
+              "leftValue": "={{ $json.isNewGin }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "05f1816b-de58-40ec-b395-6516412ff1c5",
+      "name": "GIN Baru?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2368,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d4e5f6a7-3333-4c5d-9e6f-000000000003",
+              "leftValue": "={{ $json.hasNewFiles }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d1c254d9-bb15-4f5c-83ba-a3c8fbbd8e83",
+      "name": "Ada File Baru?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1696,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "testerwhsl@gmail.com",
+        "subject": "ℹ️ Warehouse Pagi - Tidak Ada GIN Baru",
+        "message": "Semua GIN pada rekap yang masuk hari ini sudah pernah diproses sebelumnya (sudah tercatat di ProcessedAttachments). Tidak ada file baru yang diproses, file Cutoff baru TIDAK dibuat dan ActiveCutoff tidak diubah.",
+        "options": {}
+      },
+      "id": "971e1c65-af75-4a93-86c0-a0f46e07098d",
+      "name": "Send No New GIN Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1920,
+        576
+      ],
+      "webhookId": "102c5276-f328-4a6a-bc02-b166034807b5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8U48AonBtBxubvMr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e5f6a7b8-4444-4d5e-8f6a-000000000004",
+              "leftValue": "={{ $json.hasDuplicates }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "91df4ab6-9f08-4330-8a0c-ba8c55fee125",
+      "name": "Ada GIN Duplikat?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1696,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "testerwhsl@gmail.com",
+        "subject": "={{ 'ℹ️ Warehouse Pagi - ' + $json.duplicateFiles.length + ' File Duplikat Di-skip' }}",
+        "message": "={{ 'File-file berikut di-skip karena GIN-nya sudah pernah diproses sebelumnya:\\n\\n' + $json.duplicateFiles.map(f => '- ' + f.fileName + ' (GIN: ' + f.gin + ')').join('\\n') }}",
+        "options": {}
+      },
+      "id": "b7e16879-d417-4de6-a930-f34553dc63a0",
+      "name": "Send Duplicate GIN List Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1920,
+        192
+      ],
+      "webhookId": "61c0c355-aab0-4d73-801d-a021c5c3de31",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8U48AonBtBxubvMr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst duplicateFiles = staticData.duplicateFiles || [];\nconst newFileCount = staticData.newFileTabCounter || 0;\nconst newGins = staticData.newGins || [];\n\nreturn [{ json: {\n  hasNewFiles: newFileCount > 0,\n  hasDuplicates: duplicateFiles.length > 0,\n  duplicateFiles,\n  newGins,\n} }];"
+      },
+      "id": "691a1366-f1d8-48aa-badc-662e135917e5",
+      "name": "Build Loop Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/ProcessedAttachments!D:E:append",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            },
+            {
+              "name": "insertDataOption",
+              "value": "OVERWRITE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $('Build Loop Summary').first().json.newGins.map(g => [g, $('Copy Transaksi').first().json.name]) }) }}",
+        "options": {}
+      },
+      "id": "f1a21d71-462a-453e-9fb1-cacfe1287422",
+      "name": "Log Processed GINs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        5280,
+        720
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Compression": {
+      "main": [
+        [
+          {
+            "node": "Create Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Folder": {
+      "main": [
+        [
+          {
+            "node": "Normalize Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Files": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Copy Transaksi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Files": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Files Rekap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Sheet": {
+      "main": [
+        [
+          {
+            "node": "Reattach Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reattach Binary": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Build Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Extraction": {
+      "main": [
+        [
+          {
+            "node": "Write Rekap Calc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Summary": {
+      "main": [
+        [
+          {
+            "node": "Ada Anomali?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ada Anomali?": {
+      "main": [
+        [
+          {
+            "node": "Send Notification Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy Cutoff Template": {
+      "main": [
+        [
+          {
+            "node": "Read Transaksi Summary",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set Active Cutoff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy Transaksi": {
+      "main": [
+        [
+          {
+            "node": "List Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Transaksi Summary": {
+      "main": [
+        [
+          {
+            "node": "Trim Until N/A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trim Until N/A": {
+      "main": [
+        [
+          {
+            "node": "Ada PC Tidak Terdaftar?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fix Barcode Number (Rekap Harian)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Rekap Harian": {
+      "main": [
+        [
+          {
+            "node": "Write Rekap Harian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Rekap Harian": {
+      "main": [
+        [
+          {
+            "node": "Copy Template Pengambilan",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Copy Template Penyiapan",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Processed Attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy Template Pengambilan": {
+      "main": [
+        [
+          {
+            "node": "Read Cutoff Calc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Cutoff Calc": {
+      "main": [
+        [
+          {
+            "node": "Fix Barcode Number (Calc)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Pengambilan Calc": {
+      "main": [
+        [
+          {
+            "node": "Write Pengambilan Calc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fix Barcode Number (Rekap Harian)": {
+      "main": [
+        [
+          {
+            "node": "Clear Rekap Harian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fix Barcode Number (Calc)": {
+      "main": [
+        [
+          {
+            "node": "Filter H Not Zero",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter H Not Zero": {
+      "main": [
+        [
+          {
+            "node": "Clear Pengambilan Calc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Pengambilan Calc": {
+      "main": [
+        [
+          {
+            "node": "Read Calc + Personel",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Pengambilan Calc For Penerimaan",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find Last Row Penjualan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Calc + Personel": {
+      "main": [
+        [
+          {
+            "node": "Group By Personel",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Missing Barcodes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Group By Personel": {
+      "main": [
+        [
+          {
+            "node": "Loop Personel Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Copy Template Telian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Personel Sheets": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Clear Personel Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Personel Sheet": {
+      "main": [
+        [
+          {
+            "node": "Write Personel Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Personel Sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Personel Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Missing Barcodes": {
+      "main": [
+        [
+          {
+            "node": "Ada Barcode Hilang?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ada Barcode Hilang?": {
+      "main": [
+        [
+          {
+            "node": "Send Missing Barcode Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Files Rekap": {
+      "main": [
+        [
+          {
+            "node": "Build Loop Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Clear Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy Template Telian": {
+      "main": [
+        [
+          {
+            "node": "Build Telian Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Telian Data": {
+      "main": [
+        [
+          {
+            "node": "Fix Number (Telian)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fix Number (Telian)": {
+      "main": [
+        [
+          {
+            "node": "Loop Telian Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Telian Sheets": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Clear Telian Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Telian Sheet": {
+      "main": [
+        [
+          {
+            "node": "Write Telian Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Telian Sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Telian Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Rekap Calc": {
+      "main": [
+        [
+          {
+            "node": "Log Anomalies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy Template Penyiapan": {
+      "main": [
+        [
+          {
+            "node": "Write A1 Penyiapan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write A1 Penyiapan": {
+      "main": [
+        [
+          {
+            "node": "Read Cutoff Rekap Harian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Cutoff Rekap Harian": {
+      "main": [
+        [
+          {
+            "node": "Trim Rekap Harian Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trim Rekap Harian Data": {
+      "main": [
+        [
+          {
+            "node": "Clear Penyiapan Rekap Harian",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check NA Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Penyiapan Rekap Harian": {
+      "main": [
+        [
+          {
+            "node": "Write Penyiapan Rekap Harian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Penyiapan Rekap Harian": {
+      "main": [
+        [
+          {
+            "node": "Get Penyiapan Sheet Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Penyiapan Sheet Metadata": {
+      "main": [
+        [
+          {
+            "node": "Hide Columns E F I",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Pengambilan Calc For Penerimaan": {
+      "main": [
+        [
+          {
+            "node": "Find Last Row Penerimaan Barang",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Last Row Penerimaan Barang": {
+      "main": [
+        [
+          {
+            "node": "Build Penerimaan Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Penerimaan Rows": {
+      "main": [
+        [
+          {
+            "node": "Write Penerimaan Barang",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Last Row Penjualan": {
+      "main": [
+        [
+          {
+            "node": "Build Penjualan Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Penjualan Rows": {
+      "main": [
+        [
+          {
+            "node": "Write Penjualan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check NA Items": {
+      "main": [
+        [
+          {
+            "node": "Ada Item NA?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ada Item NA?": {
+      "main": [
+        [
+          {
+            "node": "Send NA Notification Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reattach Binary For Compression": {
+      "main": [
+        [
+          {
+            "node": "Compression",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set Lock Running",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ada PC Tidak Terdaftar?": {
+      "main": [
+        [
+          {
+            "node": "Send Missing PC Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Hide Columns E F I": {
+      "main": [
+        [
+          {
+            "node": "Copy Template Telian Penyiapan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy Template Telian Penyiapan": {
+      "main": [
+        [
+          {
+            "node": "Read Penyiapan A1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Penyiapan A1": {
+      "main": [
+        [
+          {
+            "node": "Read Penyiapan Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Penyiapan Data": {
+      "main": [
+        [
+          {
+            "node": "Trim And Sort Penyiapan Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trim And Sort Penyiapan Data": {
+      "main": [
+        [
+          {
+            "node": "Write Telian Tanggal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Telian Tanggal": {
+      "main": [
+        [
+          {
+            "node": "Clear Telian Rekap Harian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Telian Rekap Harian": {
+      "main": [
+        [
+          {
+            "node": "Write Telian Rekap Harian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Processed Attachments": {
+      "main": [
+        [
+          {
+            "node": "Validate Email Attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Email Attachment": {
+      "main": [
+        [
+          {
+            "node": "Attachment Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attachment Valid?": {
+      "main": [
+        [
+          {
+            "node": "Search Cutoff Ready File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Duplicate Attachment Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Active Cutoff": {
+      "main": [
+        [
+          {
+            "node": "Send Completion Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Cutoff Ready File": {
+      "main": [
+        [
+          {
+            "node": "Reattach Binary For Compression",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retry Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gmail Trigger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Processed Attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Rows": {
+      "main": [
+        [
+          {
+            "node": "GIN Baru?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GIN Baru?": {
+      "main": [
+        [
+          {
+            "node": "Validate Extraction",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Files Rekap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ada File Baru?": {
+      "main": [
+        [
+          {
+            "node": "Build Summary",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Copy Cutoff Template",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send No New GIN Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ada GIN Duplikat?": {
+      "main": [
+        [
+          {
+            "node": "Send Duplicate GIN List Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Loop Summary": {
+      "main": [
+        [
+          {
+            "node": "Ada File Baru?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Ada GIN Duplikat?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Anomalies": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Files Rekap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Penjualan": {
+      "main": [
+        [
+          {
+            "node": "Log Processed GINs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "43b51d7a-151d-4aa5-a429-b60dc769cd85",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "81e1eabc4ba32923ce5d21161f4b5bc93000397e1484e9d4888648a14504fe68"
+  },
+  "nodeGroups": [],
+  "id": "Yuv1uicEAQX3Ws4G",
+  "tags": []
+}

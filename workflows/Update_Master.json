@@ -1,0 +1,822 @@
+{
+  "name": "Update Master",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {}
+          ]
+        },
+        "simple": false,
+        "maxResults": 1,
+        "filters": {
+          "q": "'subject:\"Product Master\"'"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        240
+      ],
+      "id": "da357af2-b7a4-48f5-a6f1-149eec65ce8b",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8U48AonBtBxubvMr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "binaryPropertyName": "attachment_0",
+        "options": {
+          "headerRow": false,
+          "rawData": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        240
+      ],
+      "id": "e24b6285-6d32-40df-9f0b-1bf953114ab0",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst rows = items.map(item => item.json.row);\n\nconst dataRows = rows.slice(3);\n\nconst seenSKUs = new Set();\nconst newMasterRows = [];\nfor (const row of dataRows) {\n  const sku = row[0];\n  if (sku === undefined || sku === null || String(sku).trim() === '') continue;\n  const skuKey = String(sku).trim();\n\n  if (!/^\\d{8}$/.test(skuKey)) continue;\n  if (seenSKUs.has(skuKey)) continue;\n  seenSKUs.add(skuKey);\n\n  const desc = row[1];\n  const pcCs = row[3];\n  const barcode = row[5];      // F: barcode product\n  const outerBarcode = row[6]; // G: barcode dus/outer\n\n  newMasterRows.push({\n    sku: skuKey,\n    values: [sku, desc, pcCs, barcode, outerBarcode],\n  });\n}\n\nreturn [{ json: { newMasterRows } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        240
+      ],
+      "id": "72dbeb89-4aa1-43e9-97cd-db1209c43157",
+      "name": "Build New Master Rows",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1kUgy-NaMk_ZCaMRqEJ5VkW1XMuOS0S7gzHsc2jd6HCA/values/Master!A:A",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueRenderOption",
+              "value": "UNFORMATTED_VALUE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1792,
+        48
+      ],
+      "id": "8b6555a7-3a2f-412e-86d6-65e323e2b914",
+      "name": "Read Existing Master SKUs",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function toNumberIfPossible(v) {\n  if (v === undefined || v === null || v === '') return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\nconst newMasterRows = $('Build New Master Rows').first().json.newMasterRows;\nconst existingRowsRaw = $json.values || [];\n\nlet lastFilledIndex = -1;\nfor (let i = existingRowsRaw.length - 1; i >= 0; i--) {\n  const val = existingRowsRaw[i][0];\n  if (val !== undefined && val !== null && String(val).trim() !== '') {\n    lastFilledIndex = i;\n    break;\n  }\n}\nconst existingRows = existingRowsRaw.slice(0, lastFilledIndex + 1);\nconst existingSKUs = new Set(existingRows.map(row => String(row[0]).trim()));\n\nconst toAppend = newMasterRows.filter(item => !existingSKUs.has(item.sku));\n\nconst fixedValues = toAppend.map(item => {\n  const v = [...item.values];\n  v[0] = toNumberIfPossible(v[0]);\n  v[2] = toNumberIfPossible(v[2]);\n  v[3] = toNumberIfPossible(v[3]);\n  return v;\n});\n\nreturn [{ json: { values: fixedValues, nextRow: existingRows.length + 1, count: toAppend.length } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        48
+      ],
+      "id": "af8a7983-3950-47fd-915b-68f68678704e",
+      "name": "Identify New SKUs Only"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/1kUgy-NaMk_ZCaMRqEJ5VkW1XMuOS0S7gzHsc2jd6HCA/values/' + encodeURIComponent('Master!A' + $json.nextRow) }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $json.values }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2464,
+        0
+      ],
+      "id": "ac82c2b7-7b62-49fb-abdf-4c04d11c2f3a",
+      "name": "Write New Master Rows",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const subject = $json.subject;\nconst match = subject.match(/(\\d{1,2}\\s+\\S+\\s+\\d{4})/);\nconst masterDate = match ? match[1].trim() : null;\n\nreturn [{ json: { masterDate } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        240
+      ],
+      "id": "4a1a9755-6f0a-452e-8a5d-ffa9917068c3",
+      "name": "Extract Master Date"
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/MasterUpdateLog!A:A",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        240
+      ],
+      "id": "9164b101-47e1-4b86-97f4-40ec1893fc10",
+      "name": "Read Master Update Log",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const masterDate = $('Extract Master Date').first().json.masterDate;\nconst logRows = $json.values || [];\n\nconst alreadyUpdatedToday = logRows.some(row => row[0] === masterDate);\n\nreturn [{ json: { isValid: !alreadyUpdatedToday, masterDate } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        240
+      ],
+      "id": "ba65d163-db0f-4d3f-b137-f94188823db3",
+      "name": "Check Duplicate Master Update"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f3b6e65b-dc11-46f0-8e7d-eaf359c14e85",
+              "leftValue": "={{ $json.isValid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        240
+      ],
+      "id": "becd8523-6f2c-429f-b567-8406f4de6e7d",
+      "name": "Master Update Valid?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const trigger = $('Gmail Trigger').first();\nreturn [{ json: $json, binary: trigger.binary }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        240
+      ],
+      "id": "01870ea3-92c0-4abf-9321-4ddabd37ad4e",
+      "name": "Reattach Binary For Master"
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/ActiveCutoff!A1:B1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2688,
+        144
+      ],
+      "id": "54d699de-f119-4a85-996e-e97aecda9d7d",
+      "name": "Read Active Cutoff",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $json.values[0][1] + '/values/Master!B:B' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueRenderOption",
+              "value": "UNFORMATTED_VALUE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2912,
+        144
+      ],
+      "id": "fb0872a3-cde7-4712-9c7d-94aa137553b5",
+      "name": "Read Existing Cutoff Master SKUs",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function toNumberIfPossible(v) {\n  if (v === undefined || v === null || v === '') return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\nconst newMasterRows = $('Build New Master Rows').first().json.newMasterRows;\nconst existingRowsRaw = $json.values || [];\n\nlet lastFilledIndex = -1;\nfor (let i = existingRowsRaw.length - 1; i >= 0; i--) {\n  const val = existingRowsRaw[i][0];\n  if (val !== undefined && val !== null && String(val).trim() !== '') {\n    lastFilledIndex = i;\n    break;\n  }\n}\nconst existingRows = existingRowsRaw.slice(0, lastFilledIndex + 1);\nconst existingSKUs = new Set(existingRows.map(row => String(row[0]).trim()));\n\nconst toAppend = newMasterRows.filter(item => !existingSKUs.has(item.sku));\n\nconst fixedValues = toAppend.map(item => {\n  const [sku, desc, pcCs, barcode] = item.values;\n  return [\n    toNumberIfPossible(barcode),\n    toNumberIfPossible(sku),\n    desc,\n    toNumberIfPossible(pcCs),\n  ];\n});\n\nreturn [{ json: { values: fixedValues, nextRow: existingRows.length + 1, cutoffFileId: $('Read Active Cutoff').first().json.values[0][1], count: toAppend.length } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3136,
+        144
+      ],
+      "id": "79afee42-3c91-475f-8337-79133f2f18b6",
+      "name": "Identify New SKUs For Cutoff"
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/17liUNvCeFFKDJiUjAd2yi5k0yFlZM1PzCSUbs_aWClI/values/Master!A:A",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3808,
+        224
+      ],
+      "id": "4a164ab5-0ab5-45dd-a589-99fd43374d0a",
+      "name": "Read Existing Master SKUs For Telian",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function toNumberIfPossible(v) {\n  if (v === undefined || v === null || v === '') return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\nconst newMasterRows = $('Build New Master Rows').first().json.newMasterRows;\nconst existingRowsRaw = $json.values || [];\n\nlet lastFilledIndex = -1;\nfor (let i = existingRowsRaw.length - 1; i >= 0; i--) {\n  const val = existingRowsRaw[i][0];\n  if (val !== undefined && val !== null && String(val).trim() !== '') {\n    lastFilledIndex = i;\n    break;\n  }\n}\nconst existingRows = existingRowsRaw.slice(0, lastFilledIndex + 1);\nconst existingSKUs = new Set(existingRows.map(row => String(row[0]).trim()));\n\nconst toAppend = newMasterRows.filter(item => !existingSKUs.has(item.sku));\n\nconst fixedValues = toAppend.map(item => {\n  const [sku, desc, pcCs, barcode, outerBarcode] = item.values;\n  return [\n    toNumberIfPossible(sku), desc, '', toNumberIfPossible(pcCs), '',\n    outerBarcode, toNumberIfPossible(barcode), outerBarcode, desc,\n  ];\n});\n\nreturn [{ json: { values: fixedValues, nextRow: existingRows.length + 1, count: toAppend.length } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4032,
+        224
+      ],
+      "id": "799e82e7-a687-4786-8bea-f499e507bac1",
+      "name": "Identify New SKUs For Telian"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/17liUNvCeFFKDJiUjAd2yi5k0yFlZM1PzCSUbs_aWClI/values/Master!A' + $json.nextRow }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $json.values }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        4480,
+        128
+      ],
+      "id": "a644a222-b7e6-44a9-bb40-279951974309",
+      "name": "Write New Master Rows To Telian",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4e5f9288-eee0-4945-a26e-c33d49d40aa0",
+              "leftValue": "={{ $json.count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2240,
+        48
+      ],
+      "id": "297a3b31-56fa-4ff4-b566-aab3d3c1d9db",
+      "name": "Has New Rekap Calc Items?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "85289c39-38aa-416f-a2fa-8358dfcc6d6d",
+              "leftValue": "={{ $json.count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3360,
+        144
+      ],
+      "id": "f857fb9d-42ec-4d23-b736-8c8c430413f3",
+      "name": "Has New Cutoff Items?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b97b72de-3c89-449a-bc2f-76da71cc6591",
+              "leftValue": "={{ $json.count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4256,
+        224
+      ],
+      "id": "fe9d7649-64aa-407a-9dcc-a0c5f216bb4a",
+      "name": "Has New Telian Items?"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $json.cutoffFileId + '/values/Master!A' + $json.nextRow }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $json.values }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3584,
+        48
+      ],
+      "id": "58b02e07-d3e6-44de-b2ec-d122c8d5a246",
+      "name": "Write New Master Rows To Cutoff",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/MasterUpdateLog!A:E:append",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            },
+            {
+              "name": "insertDataOption",
+              "value": "INSERT_ROWS"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: [[\n  $('Extract Master Date').first().json.masterDate,\n  $('Identify New SKUs Only').first().json.count + ' Item',\n  $('Identify New SKUs For Cutoff').first().json.count + ' Item',\n  $('Identify New SKUs For Telian').first().json.count + ' Item',\n  new Date().toISOString()\n]] }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        4704,
+        224
+      ],
+      "id": "f5b7155b-bc0a-4545-a0cd-3023d58c75b5",
+      "name": "Log Master Update",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract Master Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Build New Master Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build New Master Rows": {
+      "main": [
+        [
+          {
+            "node": "Read Existing Master SKUs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Existing Master SKUs": {
+      "main": [
+        [
+          {
+            "node": "Identify New SKUs Only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Identify New SKUs Only": {
+      "main": [
+        [
+          {
+            "node": "Has New Rekap Calc Items?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Master Date": {
+      "main": [
+        [
+          {
+            "node": "Read Master Update Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Master Update Log": {
+      "main": [
+        [
+          {
+            "node": "Check Duplicate Master Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Duplicate Master Update": {
+      "main": [
+        [
+          {
+            "node": "Master Update Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Master Update Valid?": {
+      "main": [
+        [
+          {
+            "node": "Reattach Binary For Master",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write New Master Rows": {
+      "main": [
+        [
+          {
+            "node": "Read Active Cutoff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reattach Binary For Master": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Active Cutoff": {
+      "main": [
+        [
+          {
+            "node": "Read Existing Cutoff Master SKUs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Existing Cutoff Master SKUs": {
+      "main": [
+        [
+          {
+            "node": "Identify New SKUs For Cutoff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Identify New SKUs For Cutoff": {
+      "main": [
+        [
+          {
+            "node": "Has New Cutoff Items?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Existing Master SKUs For Telian": {
+      "main": [
+        [
+          {
+            "node": "Identify New SKUs For Telian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Identify New SKUs For Telian": {
+      "main": [
+        [
+          {
+            "node": "Has New Telian Items?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has New Rekap Calc Items?": {
+      "main": [
+        [
+          {
+            "node": "Write New Master Rows",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read Active Cutoff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has New Cutoff Items?": {
+      "main": [
+        [
+          {
+            "node": "Write New Master Rows To Cutoff",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read Existing Master SKUs For Telian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has New Telian Items?": {
+      "main": [
+        [
+          {
+            "node": "Write New Master Rows To Telian",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Master Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write New Master Rows To Telian": {
+      "main": [
+        [
+          {
+            "node": "Log Master Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write New Master Rows To Cutoff": {
+      "main": [
+        [
+          {
+            "node": "Read Existing Master SKUs For Telian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "39e67398-10fc-423a-b25a-6449074284f9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "81e1eabc4ba32923ce5d21161f4b5bc93000397e1484e9d4888648a14504fe68"
+  },
+  "nodeGroups": [],
+  "id": "in1uFa31AJGldCMU",
+  "tags": []
+}

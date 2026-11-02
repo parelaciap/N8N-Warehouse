@@ -1,0 +1,1664 @@
+{
+  "name": "Warehouse Sore",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 5,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1zx5BJ-_l-bCOhXSyAiB2lJcsbvaaUAHW",
+          "mode": "list",
+          "cachedResultName": "Sahar",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1zx5BJ-_l-bCOhXSyAiB2lJcsbvaaUAHW"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        192
+      ],
+      "id": "c30827e7-54fa-4b81-97f8-51598e0f5083",
+      "name": "Google Drive Trigger (Sahar)",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 5,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1h5qhzmJRgXm55TB8cyqwHJtwSbkYVxCV",
+          "mode": "list",
+          "cachedResultName": "Rama",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1h5qhzmJRgXm55TB8cyqwHJtwSbkYVxCV"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        384
+      ],
+      "id": "35e53ca4-0557-4361-a5be-1c47174cf393",
+      "name": "Google Drive Trigger (Rama)",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 5,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1Qy3baaEVuAMiB6ESbFzwqCG8lHHv1d8F",
+          "mode": "list",
+          "cachedResultName": "Rengga",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1Qy3baaEVuAMiB6ESbFzwqCG8lHHv1d8F"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        576
+      ],
+      "id": "1960a222-0f4b-4d2a-8eb4-b07587ab59b2",
+      "name": "Google Drive Trigger (Rengga)",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 5,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1xAfnWzQhvxL4IUVxesDRGuTGDm3lqqRz",
+          "mode": "list",
+          "cachedResultName": "Saiful",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1xAfnWzQhvxL4IUVxesDRGuTGDm3lqqRz"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        768
+      ],
+      "id": "3decb878-b773-40ef-a5d8-0a25ed3d476a",
+      "name": "Google Drive Trigger (Saiful)",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const fileName = $json.name;\nconst match = fileName.match(/^(Rama|Rengga|Sahar|Syaiful)\\s+Penyiapan\\s+(.+)$/i);\n\nif (!match) {\n  return []; // nama belum sesuai pola (mungkin baru upload, belum di-rename) -- stop, jangan lanjut\n}\n\nconst personelName = match[1];\nconst attachmentName = match[2].trim().replace(/\\.(xlsx|xls)$/i, '').trim();\n\nreturn [{ json: { fileId: $json.id, fileName, attachmentName, personelName } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        384
+      ],
+      "id": "bf327abf-fd5f-49f8-ba1f-59d5de76bfae",
+      "name": "Extract Attachment Name"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Validate Cutoff Match').first().json.fileId + '/values/' + encodeURIComponent('Retur!C:C') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1344,
+        192
+      ],
+      "id": "a8a9e9de-98ef-4f90-a89f-deb3465a160e",
+      "name": "Find Last Row Retur",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst lastRowData = $('Find Last Row Retur').first().json.values || [];\nconst nextRow = lastRowData.length + 1;\n\nfunction toNumberIfPossible(v) {\n  if (v === undefined || v === null || v === '') return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\nconst trimmed = [];\nfor (const item of items) {\n  const row = item.json.row || [];\n  const gin = row[0];\n  if (gin === undefined || gin === null || String(gin).trim() === '') break;\n  trimmed.push([row[0], row[1], row[2], row[8], row[11]]);\n}\n\nconst NUMERIC_COLS = [0, 1, 2, 3]; // GIN, PC, Barcode, Total pcs\nconst fixedRows = trimmed.map(row => {\n  const r = [...row];\n  for (const col of NUMERIC_COLS) r[col] = toNumberIfPossible(r[col]);\n  return r;\n});\n\nreturn [{ json: { values: fixedRows, nextRow } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        192
+      ],
+      "id": "711f1c33-fc08-41a2-94eb-2af5559c530d",
+      "name": "Build Retur Rows"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Validate Cutoff Match').first().json.fileId + '/values/' + encodeURIComponent('Retur!A' + $json.nextRow) }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "USER_ENTERED"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $json.values }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2240,
+        192
+      ],
+      "id": "e4479253-dfbc-478d-808c-9e8c380c66cc",
+      "name": "Write Retur",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $json;\nconst key = item.personelName + '__' + item.attachmentName;\nconst now = Date.now();\nconst FIFTEEN_DAYS_MS = 15 * 24 * 60 * 60 * 1000;\n\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.processedRetur) staticData.processedRetur = [];\n\n// buang entri yang sudah lebih dari 15 hari\nstaticData.processedRetur = staticData.processedRetur.filter(\n  entry => (now - entry.timestamp) < FIFTEEN_DAYS_MS\n);\n\n// cek apakah kombinasi ini sudah pernah diproses (dalam 15 hari terakhir)\nconst isDuplicate = staticData.processedRetur.some(entry => entry.key === key);\nif (isDuplicate) {\n  return []; // sudah pernah diproses, stop di sini\n}\n\n// catat sebagai baru diproses\nstaticData.processedRetur.push({ key, timestamp: now });\n\nreturn [item];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        384
+      ],
+      "id": "63bbdae5-396c-4153-ac1b-3498d5df30ad",
+      "name": "Check Not Duplicate"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/PersonelProgress!A:C:append",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            },
+            {
+              "name": "insertDataOption",
+              "value": "INSERT_ROWS"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: [[\n  $('Extract Attachment Name').first().json.attachmentName,\n  $('Extract Attachment Name').first().json.personelName,\n  new Date().toISOString()\n]] }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        896,
+        576
+      ],
+      "id": "8944de41-8089-4fe9-af55-f8c732b702ba",
+      "name": "Append Personel Progress",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/PersonelProgress!A:B",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1120,
+        576
+      ],
+      "id": "dc208bc1-6105-4b07-a3ae-9f5f73a043f6",
+      "name": "Read Progress For Attachment",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/PendingCutoffDone!A:B",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1344,
+        576
+      ],
+      "id": "81e71538-8348-4a67-bce2-0d28507fe794",
+      "name": "Read Pending Queue",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const attachmentName = $('Extract Attachment Name').first().json.attachmentName;\nconst REQUIRED = ['Rama', 'Rengga', 'Sahar', 'Syaiful'];\n\nconst progressRows = $('Read Progress For Attachment').first().json.values || [];\nconst donePersonel = progressRows\n  .filter(row => row[0] === attachmentName)\n  .map(row => row[1]);\n\nconst allDone = REQUIRED.every(p => donePersonel.includes(p));\nif (!allDone) return [];\n\nconst queueRows = $('Read Pending Queue').first().json.values || [];\nconst alreadyQueued = queueRows.some(row => row[0] === attachmentName);\nif (alreadyQueued) return [];\n\nreturn [{ json: { attachmentName } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        576
+      ],
+      "id": "2960b2d1-f613-4a9b-ba8c-0b1226b5a070",
+      "name": "Check All Done And Queue"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/PendingCutoffDone!A:B:append",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            },
+            {
+              "name": "insertDataOption",
+              "value": "INSERT_ROWS"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: [[ $json.attachmentName, 'pending' ]] }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1792,
+        576
+      ],
+      "id": "054f26e7-a790-402d-8d87-a12a9194cf56",
+      "name": "Add To Pending Queue",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const attachmentName = $('Extract Attachment Name').first().json.attachmentName;\nconst personelName = $('Extract Attachment Name').first().json.personelName;\nconst row = ($json.values && $json.values[0]) || [];\nconst activeAttachmentName = row[0];\nconst activeFileId = row[1];\n\nif (attachmentName !== activeAttachmentName) {\n  return [{ json: { isValid: false, personelName, attachmentName } }];\n}\n\nreturn [{ json: { isValid: true, fileId: activeFileId, fileName: activeAttachmentName } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        288
+      ],
+      "id": "63c3cb3b-4415-40dc-88f9-6a432aaccf33",
+      "name": "Validate Cutoff Match"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e76e2f74-0a94-4945-8574-c2e0d729f8df",
+              "leftValue": "={{ $json.isValid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        288
+      ],
+      "id": "a04997ac-77c2-4ce5-9bdd-9daed80d0ce8",
+      "name": "Cutoff Valid?"
+    },
+    {
+      "parameters": {
+        "sendTo": "testerwhsl@gmail.com",
+        "subject": "={{ '⚠️ Tanggal Retur Tidak Cocok - ' + $json.personelName + ' Penyiapan ' + $json.attachmentName }}",
+        "message": "={{ 'Personel ' + $json.personelName + ' upload retur untuk tanggal \"' + $json.attachmentName + '\", tapi file Cutoff untuk tanggal itu TIDAK DITEMUKAN sebagai file aktif (kemungkinan sudah \"Done\" atau belum dibuat). Data retur ini TIDAK tertulis ke mana pun. Mohon cek manual dan minta personel upload ulang dengan nama file yang sesuai tanggal aktif hari ini.' }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        384
+      ],
+      "id": "080e61fc-eef7-49f4-9efb-7d69293619a0",
+      "name": "Send Cutoff Mismatch Email",
+      "webhookId": "20c40072-9bc6-4497-afcc-03b4210ec688",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8U48AonBtBxubvMr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/ActiveCutoff!A1:B1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        672,
+        384
+      ],
+      "id": "1d7d222a-da84-47b8-a0c9-5d8aaefbcf24",
+      "name": "Find Cutoff File",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/STOKOPNAME!' + $('Resolve STOKOPNAME Columns').first().json.colE + '1' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "USER_ENTERED"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: [[ $('Resolve STOKOPNAME Columns').first().json.currentCutoffName ]] }) }}",
+        "options": {}
+      },
+      "id": "2c82755d-3a9b-4f8a-8c39-a0cfddc4a522",
+      "name": "Write STOKOPNAME Header",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3360,
+        96
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/STOKOPNAME!A3:D100000",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "b3efed3d-04eb-428c-b6de-0316759a4544",
+      "name": "Read STOKOPNAME Barcodes For Stok",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2912,
+        768
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Validate Cutoff Match').first().json.fileId + '/values/' + encodeURIComponent('Alamat!B2:L100000') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "d99e476b-6f65-4e9b-b81b-7bbefee33a9b",
+      "name": "Read Alamat For Stok Akhir",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3360,
+        768
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const PERSONEL_MAP = { Rama: 1, Syaiful: 2, Rengga: 3, Sahar: 4 };\nconst personelName = $('Extract Attachment Name').first().json.personelName;\nconst personelCode = PERSONEL_MAP[personelName];\n\nconst EKS_PATTERN = /^(EKS|EX|EK|EXS)\\s/;\nconst stokopnameRows = $('Read STOKOPNAME Barcodes For Stok').first().json.values || [];\nif (stokopnameRows.length === 0) return [];\n\nconst existingStok = $('Read STOKOPNAME Existing Stok Akhir').first().json.values || [];\nconst alamatRows = $json.values || []; // Alamat!B2:L100000\n\nconst stokByBarcode = new Map();\nfor (const row of alamatRows) {\n  const barcode = row[0]; // B\n  if (barcode === undefined || barcode === null || String(barcode).trim() === '') continue;\n  const alamat = row[2]; // D\n  if (alamat !== undefined && alamat !== null && EKS_PATTERN.test(String(alamat).trim())) continue; // skip obsolete\n  const stokAkhir = row[8]; // J\n  stokByBarcode.set(String(barcode).trim(), stokAkhir);\n}\n\nconst values = stokopnameRows.map((row, i) => {\n  const barcode = row[0];       // kolom A STOKOPNAME\n  const rowPersonel = row[1];   // kolom B STOKOPNAME = Personel (udah ada dari awal)\n  const isThisPersonel = rowPersonel !== undefined && rowPersonel !== null && String(rowPersonel).trim() === String(personelCode);\n\n  if (isThisPersonel) {\n    const key = (barcode !== undefined && barcode !== null) ? String(barcode).trim() : '';\n    if (stokByBarcode.has(key)) return [ stokByBarcode.get(key) ];\n  }\n\n  const existing = (existingStok[i] && existingStok[i][0] !== undefined) ? existingStok[i][0] : '';\n  return [ existing ];\n});\n\nreturn [{ json: { values } }];"
+      },
+      "id": "a525d8e7-1f2a-4d14-93ea-ed25b712d802",
+      "name": "Build Stok Akhir Values",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3584,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/STOKOPNAME!' + $('Resolve STOKOPNAME Columns').first().json.colE + '3' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "USER_ENTERED"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $json.values }) }}",
+        "options": {}
+      },
+      "id": "4de51926-66af-408e-91c0-01798341ca1b",
+      "name": "Write STOKOPNAME Stok Akhir",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3808,
+        768
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/STOKOPNAME!' + $('Resolve STOKOPNAME Columns').first().json.colE + '3:' + $('Resolve STOKOPNAME Columns').first().json.colE + '100000' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "4593fafa-fc7d-493c-a899-d5437f813458",
+      "name": "Read STOKOPNAME Existing Stok Akhir",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3136,
+        768
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const stokopnameRows = $('Read STOKOPNAME Barcodes For Stok').first().json.values || [];\nif (stokopnameRows.length === 0) return [];\n\nconst formulas = stokopnameRows.map((_, i) => {\n  const row = i + 3; // range mulai A3\n  return [ `=VLOOKUP(A${row};PIVOT!B:C;2;0)` ];\n});\n\nreturn [{ json: { formulas } }];"
+      },
+      "id": "d156542a-7280-466c-8d45-8764e97711fb",
+      "name": "Build STOKOPNAME Formulas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4032,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/STOKOPNAME!' + $('Resolve STOKOPNAME Columns').first().json.colF + '3' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "USER_ENTERED"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $json.formulas }) }}",
+        "options": {}
+      },
+      "id": "f88d0a57-7d10-4a68-bcc7-60f53d91553a",
+      "name": "Write STOKOPNAME Formulas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        4256,
+        768
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cols = $('Resolve STOKOPNAME Columns').first().json;\nconst stokopnameRows = $('Read STOKOPNAME Barcodes For Stok').first().json.values || [];\nif (stokopnameRows.length === 0) return [];\n\nconst formulas = stokopnameRows.map((_, i) => {\n  const row = i + 3; // range mulai A3\n  return [ `=${cols.colF}${row}-${cols.colE}${row}` ];\n});\n\nreturn [{ json: { formulas } }];"
+      },
+      "id": "75f34969-aaeb-4a86-9264-113671c9c2ab",
+      "name": "Build STOKOPNAME Selisih Formulas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4480,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/STOKOPNAME!' + $('Resolve STOKOPNAME Columns').first().json.colG + '3' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "USER_ENTERED"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $json.formulas }) }}",
+        "options": {}
+      },
+      "id": "ce2a3fbf-da09-4d3d-a790-15aab7e8fdbc",
+      "name": "Write STOKOPNAME Selisih Formulas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        4704,
+        768
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/ActiveCutoff!A1:D1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "22d1c33c-9748-4a12-8a48-38da922efda0",
+      "name": "Read ActiveCutoff Stokopname State",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2464,
+        192
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function colToIndex(col) {\n  let idx = 0;\n  for (const ch of col.toUpperCase()) idx = idx * 26 + (ch.charCodeAt(0) - 64);\n  return idx - 1;\n}\nfunction indexToCol(idx) {\n  let n = idx + 1, s = '';\n  while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); }\n  return s;\n}\n\nconst row = ($json.values && $json.values[0]) || [];\nconst currentCutoffName = row[0] || '';\nconst lastAssignedName = row[2] || '';\nconst lastAssignedCol = row[3] || '';\n\nlet startCol;\nlet isNewCycle;\nif (lastAssignedName === currentCutoffName && lastAssignedCol) {\n  startCol = lastAssignedCol;\n  isNewCycle = false;\n} else {\n  isNewCycle = true;\n  startCol = lastAssignedCol ? indexToCol(colToIndex(lastAssignedCol) + 3) : 'E';\n}\n\nconst colE = startCol;\nconst colF = indexToCol(colToIndex(startCol) + 1);\nconst colG = indexToCol(colToIndex(startCol) + 2);\n\nreturn [{ json: { startCol, colE, colF, colG, isNewCycle, currentCutoffName } }];"
+      },
+      "id": "3f39695d-49a1-4931-97b2-895ea4abd8b4",
+      "name": "Resolve STOKOPNAME Columns",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2688,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.isNewCycle }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "rightValue": "",
+              "id": "c6fc79e4-c45b-40dd-b2a2-2c5bfdcf990d"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "04ed4620-019d-4919-85a4-7c06413dcf9c",
+      "name": "Filter Is New Cycle",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2912,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/ActiveCutoff!C1:D1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: [[ $json.currentCutoffName, $json.startCol ]] }) }}",
+        "options": {}
+      },
+      "id": "081bc121-8a6d-42b7-a93b-fdb3b3d6809c",
+      "name": "Write Stokopname Column State",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3136,
+        480
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/STOKOPNAME!' + $('Resolve STOKOPNAME Columns').first().json.colE + '2' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "USER_ENTERED"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: [[ 'Akhir', 'SO', 'Selisih' ]] }) }}",
+        "options": {}
+      },
+      "id": "00dcc6d8-b060-4f58-985f-fad3fbaee28d",
+      "name": "Write STOKOPNAME Column Labels",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3360,
+        576
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function colToIndex(col) {\n  let idx = 0;\n  for (const ch of col.toUpperCase()) idx = idx * 26 + (ch.charCodeAt(0) - 64);\n  return idx - 1;\n}\nfunction indexToCol(idx) {\n  let n = idx + 1, s = '';\n  while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); }\n  return s;\n}\n\nconst cols = $('Resolve STOKOPNAME Columns').first().json;\n\nif (cols.colE === 'E') return []; // siklus pertama, belum ada histori buat dibandingin\n\n// mundur sampai 3 siklus sebelumnya (tiap siklus = 3 kolom), tapi jangan sampai sebelum kolom E (siklus pertama)\nconst curIdx = colToIndex(cols.colE);\nconst earliestValidIdx = colToIndex('E');\nconst startIdx = Math.max(curIdx - 9, earliestValidIdx);\nconst colLastPrev = indexToCol(curIdx - 3); // siklus sebelumnya yang paling baru (tepat sebelum current)\n\nreturn [{ json: { colStart: indexToCol(startIdx), colLastPrev, colE: cols.colE, colF: cols.colF, colG: cols.colG } }];"
+      },
+      "id": "442afa29-faa7-407c-a627-8735fa9f0e09",
+      "name": "Check Has Previous Cycle",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4928,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function colToIndex(col) {\n  let idx = 0;\n  for (const ch of col.toUpperCase()) idx = idx * 26 + (ch.charCodeAt(0) - 64);\n  return idx - 1;\n}\nfunction indexToCol(idx) {\n  let n = idx + 1, s = '';\n  while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); }\n  return s;\n}\n\nconst PERSONEL_MAP = { Rama: 1, Syaiful: 2, Rengga: 3, Sahar: 4 };\nconst personelName = $('Extract Attachment Name').first().json.personelName;\nconst personelCode = String(PERSONEL_MAP[personelName]);\n\nconst cols = $('Check Has Previous Cycle').first().json;\nconst startIdx = colToIndex(cols.colStart);\nconst curIdx = colToIndex(cols.colE);\n\n// daftar kolom E tiap siklus, dari yang paling lama sampai sekarang (kelipatan 3 kolom)\nconst cycleStartCols = [];\nfor (let idx = startIdx; idx <= curIdx; idx += 3) cycleStartCols.push(indexToCol(idx));\n\nconst barcodeRows = $('Read STOKOPNAME Barcodes For Stok').first().json.values || []; // A:D\n\nconst perPersonelRows = { '1': [], '2': [], '3': [], '4': [] };\nconst MAX_CYCLES = 4;\n// Q = bandingin Selisih siklus sekarang (P) vs sebelumnya (M) di BARIS DIA SENDIRI,\n// pakai ROW() biar otomatis nunjuk ke baris manapun dia nanti ditulis (append)\nconst Q_FORMULA = '=INDIRECT(\"P\"&ROW())=INDIRECT(\"M\"&ROW())';\n\nbarcodeRows.forEach((row, i) => {\n  const barcode = row[0], personel = row[1], description = row[2], alamat = row[3];\n  const personelKey = (personel !== undefined && personel !== null) ? String(personel).trim() : '';\n  if (personelKey !== personelCode) return; // cuma barcode milik personel yang lagi upload\n  if (!perPersonelRows[personelKey]) return;\n\n  const stokRow = i + 3; // baris A3 = index 0\n\n  // formula ref tiap siklus, urut dari paling lama -> sekarang; siklus yang belum ada historinya diisi kosong\n  const padCount = MAX_CYCLES - cycleStartCols.length;\n  const formulaCols = [];\n  for (let p = 0; p < padCount; p++) formulaCols.push('', '', '');\n  cycleStartCols.forEach(startCol => {\n    const colE = startCol;\n    const colF = indexToCol(colToIndex(startCol) + 1);\n    const colG = indexToCol(colToIndex(startCol) + 2);\n    formulaCols.push(`=STOKOPNAME!${colE}${stokRow}`, `=STOKOPNAME!${colF}${stokRow}`, `=STOKOPNAME!${colG}${stokRow}`);\n  });\n\n  perPersonelRows[personelKey].push([\n    barcode, personel, description, alamat,\n    ...formulaCols,\n    Q_FORMULA\n  ]);\n});\n\nreturn Object.entries(perPersonelRows)\n  .filter(([, rows]) => rows.length > 0)\n  .map(([personelKey, rows]) => ({ json: { personelKey, rows } }));"
+      },
+      "id": "36a0490c-889f-478b-adf2-3d98fee563e3",
+      "name": "Build Personnel Discrepancy Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5376,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/' + encodeURIComponent($json.personelKey + '!A:Q') + ':append' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "USER_ENTERED"
+            },
+            {
+              "name": "insertDataOption",
+              "value": "OVERWRITE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $json.rows }) }}",
+        "options": {}
+      },
+      "id": "7598627f-db8f-414a-ad68-76fcc700fe3c",
+      "name": "Write Personnel Discrepancy Rows",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        5600,
+        864
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/1!A3:Q100000:clear",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "2187c55f-09ee-4b17-a556-cff50877be95",
+      "name": "Clear Personnel Sheet 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3136,
+        288
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/2!A3:Q100000:clear",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "478928b8-0121-4e07-a2d2-0fd6acfc40fc",
+      "name": "Clear Personnel Sheet 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3136,
+        96
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/3!A3:Q100000:clear",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "fc385fb6-c5e7-4781-8360-ae47ad13df93",
+      "name": "Clear Personnel Sheet 3",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3136,
+        -96
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/4!A3:Q100000:clear",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "2f9de50b-7387-4760-ae2b-a12207c758c5",
+      "name": "Clear Personnel Sheet 4",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3136,
+        -288
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/STOKOPNAME!' + $json.colStart + '1:' + $json.colLastPrev + '1' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "e6be353d-4e6a-441d-9786-fbc3a5f341a5",
+      "name": "Read Previous Cutoff Name",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        5152,
+        672
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ valueInputOption: 'USER_ENTERED', data: [1,2,3,4].flatMap(sheet => [\n  { range: sheet + '!E1', values: [[ $json.labels[0] ]] },\n  { range: sheet + '!H1', values: [[ $json.labels[1] ]] },\n  { range: sheet + '!K1', values: [[ $json.labels[2] ]] },\n  { range: sheet + '!N1', values: [[ $json.labels[3] ]] },\n  { range: sheet + '!E2:G2', values: [[ 'Akhir', 'SO', 'Selisih' ]] },\n  { range: sheet + '!H2:J2', values: [[ 'Akhir', 'SO', 'Selisih' ]] },\n  { range: sheet + '!K2:M2', values: [[ 'Akhir', 'SO', 'Selisih' ]] },\n  { range: sheet + '!N2:P2', values: [[ 'Akhir', 'SO', 'Selisih' ]] },\n]) }) }}",
+        "options": {}
+      },
+      "id": "3dc6d3eb-1846-4232-95be-9ecdb2a11006",
+      "name": "Write Personnel Header Names",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        5600,
+        672
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://www.googleapis.com/drive/v3/files/' + $('Extract Attachment Name').first().json.fileId + '?alt=media' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "0210f9ba-e34a-40c8-a0d7-1f98f17b7a07",
+      "name": "Download Retur Excel File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1568,
+        192
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "headerRow": false,
+          "range": "A2:L3000",
+          "rawData": true,
+          "sheetName": "Retur"
+        }
+      },
+      "id": "eaf17814-e3c4-42c0-ae83-a411e4a37b88",
+      "name": "Extract Retur Excel Rows",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1792,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function colToIndex(col) {\n  let idx = 0;\n  for (const ch of col.toUpperCase()) idx = idx * 26 + (ch.charCodeAt(0) - 64);\n  return idx - 1;\n}\n\nconst cols = $('Check Has Previous Cycle').first().json;\nconst row = ($json.values && $json.values[0]) || [];\n\nconst prevCount = (colToIndex(cols.colLastPrev) - colToIndex(cols.colStart)) / 3 + 1;\nconst prevDates = [];\nfor (let i = 0; i < prevCount; i++) prevDates.push(row[i * 3] || '');\n\n// nama siklus sekarang diambil dari memory (bukan baca ulang sheet), supaya nggak race\n// dengan cabang paralel yang baru nulis STOKOPNAME!{colE}1 di eksekusi ini\nconst currentCutoffName = $('Resolve STOKOPNAME Columns').first().json.currentCutoffName;\nconst allDates = [...prevDates, currentCutoffName]; // oldest -> current\n\nconst MAX_CYCLES = 4;\nconst labels = Array(MAX_CYCLES - allDates.length).fill('').concat(allDates);\n\nreturn [{ json: { labels } }];"
+      },
+      "id": "0bf7aacb-2912-45da-9e1d-a770be6ff889",
+      "name": "Build Cycle Date Labels",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5376,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U?fields=sheets.properties(sheetId,title)",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "89a58007-84da-47b9-924e-ab198d1eb523",
+      "name": "Get Personnel Sheets Metadata",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3136,
+        -480
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function colToIndex(col) {\n  let idx = 0;\n  for (const ch of col.toUpperCase()) idx = idx * 26 + (ch.charCodeAt(0) - 64);\n  return idx - 1;\n}\n\nconst sheets = $json.sheets || [];\nconst targetTitles = ['1', '2', '3', '4'];\nconst selisihCols = [6, 9, 12, 15]; // G,J,M,P (0-indexed) - kolom Selisih tiap grup siklus di sheet personel\n\nconst requests = [];\nfor (const title of targetTitles) {\n  const sheet = sheets.find(s => String(s.properties.title) === title);\n  if (!sheet) continue;\n  const sheetId = sheet.properties.sheetId;\n  for (const col of selisihCols) {\n    requests.push({\n      repeatCell: {\n        range: { sheetId, startColumnIndex: col, endColumnIndex: col + 1 },\n        cell: { userEnteredFormat: { textFormat: { bold: true } } },\n        fields: 'userEnteredFormat.textFormat.bold',\n      },\n    });\n  }\n}\n\n// STOKOPNAME: kolom Selisih tumbuh terus tiap siklus baru (G, J, M, ...), jadi bold semua\n// dari siklus pertama sampai siklus sekarang -- sekalian backfill yang lama kalau belum di-bold\nconst stokopnameSheet = sheets.find(s => String(s.properties.title) === 'STOKOPNAME');\nconst colGCurrent = $('Resolve STOKOPNAME Columns').first().json.colG;\nif (stokopnameSheet && colGCurrent) {\n  const sheetId = stokopnameSheet.properties.sheetId;\n  const firstG = 6; // kolom G, siklus pertama\n  const lastG = colToIndex(colGCurrent);\n  for (let col = firstG; col <= lastG; col += 3) {\n    requests.push({\n      repeatCell: {\n        range: { sheetId, startColumnIndex: col, endColumnIndex: col + 1 },\n        cell: { userEnteredFormat: { textFormat: { bold: true } } },\n        fields: 'userEnteredFormat.textFormat.bold',\n      },\n    });\n  }\n}\n\nreturn [{ json: { requests } }];"
+      },
+      "id": "5822aa8c-9b13-4277-b38f-bb1e40184f03",
+      "name": "Build Selisih Bold Requests",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3360,
+        -480
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ requests: $json.requests }) }}",
+        "options": {}
+      },
+      "id": "e95e71fc-770a-43c6-bb76-2b8bfc471e7d",
+      "name": "Apply Selisih Bold Formatting",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3584,
+        -480
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger (Sahar)": {
+      "main": [
+        [
+          {
+            "node": "Extract Attachment Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger (Rama)": {
+      "main": [
+        [
+          {
+            "node": "Extract Attachment Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger (Rengga)": {
+      "main": [
+        [
+          {
+            "node": "Extract Attachment Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger (Saiful)": {
+      "main": [
+        [
+          {
+            "node": "Extract Attachment Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Attachment Name": {
+      "main": [
+        [
+          {
+            "node": "Check Not Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Retur Rows": {
+      "main": [
+        [
+          {
+            "node": "Write Retur",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Not Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Find Cutoff File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Personel Progress": {
+      "main": [
+        [
+          {
+            "node": "Read Progress For Attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Progress For Attachment": {
+      "main": [
+        [
+          {
+            "node": "Read Pending Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Pending Queue": {
+      "main": [
+        [
+          {
+            "node": "Check All Done And Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check All Done And Queue": {
+      "main": [
+        [
+          {
+            "node": "Add To Pending Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Cutoff Match": {
+      "main": [
+        [
+          {
+            "node": "Cutoff Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cutoff Valid?": {
+      "main": [
+        [
+          {
+            "node": "Find Last Row Retur",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Cutoff Mismatch Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Cutoff File": {
+      "main": [
+        [
+          {
+            "node": "Validate Cutoff Match",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append Personel Progress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Alamat For Stok Akhir": {
+      "main": [
+        [
+          {
+            "node": "Build Stok Akhir Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Stok Akhir Values": {
+      "main": [
+        [
+          {
+            "node": "Write STOKOPNAME Stok Akhir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read STOKOPNAME Barcodes For Stok": {
+      "main": [
+        [
+          {
+            "node": "Read STOKOPNAME Existing Stok Akhir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read STOKOPNAME Existing Stok Akhir": {
+      "main": [
+        [
+          {
+            "node": "Read Alamat For Stok Akhir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write STOKOPNAME Stok Akhir": {
+      "main": [
+        [
+          {
+            "node": "Build STOKOPNAME Formulas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build STOKOPNAME Formulas": {
+      "main": [
+        [
+          {
+            "node": "Write STOKOPNAME Formulas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write STOKOPNAME Formulas": {
+      "main": [
+        [
+          {
+            "node": "Build STOKOPNAME Selisih Formulas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build STOKOPNAME Selisih Formulas": {
+      "main": [
+        [
+          {
+            "node": "Write STOKOPNAME Selisih Formulas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Retur": {
+      "main": [
+        [
+          {
+            "node": "Read ActiveCutoff Stokopname State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read ActiveCutoff Stokopname State": {
+      "main": [
+        [
+          {
+            "node": "Resolve STOKOPNAME Columns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve STOKOPNAME Columns": {
+      "main": [
+        [
+          {
+            "node": "Filter Is New Cycle",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read STOKOPNAME Barcodes For Stok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Is New Cycle": {
+      "main": [
+        [
+          {
+            "node": "Write Stokopname Column State",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Clear Personnel Sheet 1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Clear Personnel Sheet 2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Clear Personnel Sheet 3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Clear Personnel Sheet 4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Personnel Sheets Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Stokopname Column State": {
+      "main": [
+        [
+          {
+            "node": "Write STOKOPNAME Header",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Write STOKOPNAME Column Labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write STOKOPNAME Selisih Formulas": {
+      "main": [
+        [
+          {
+            "node": "Check Has Previous Cycle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Has Previous Cycle": {
+      "main": [
+        [
+          {
+            "node": "Read Previous Cutoff Name",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Personnel Discrepancy Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Personnel Discrepancy Rows": {
+      "main": [
+        [
+          {
+            "node": "Write Personnel Discrepancy Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Last Row Retur": {
+      "main": [
+        [
+          {
+            "node": "Download Retur Excel File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Retur Excel File": {
+      "main": [
+        [
+          {
+            "node": "Extract Retur Excel Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Retur Excel Rows": {
+      "main": [
+        [
+          {
+            "node": "Build Retur Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Previous Cutoff Name": {
+      "main": [
+        [
+          {
+            "node": "Build Cycle Date Labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Cycle Date Labels": {
+      "main": [
+        [
+          {
+            "node": "Write Personnel Header Names",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Personnel Sheets Metadata": {
+      "main": [
+        [
+          {
+            "node": "Build Selisih Bold Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Selisih Bold Requests": {
+      "main": [
+        [
+          {
+            "node": "Apply Selisih Bold Formatting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "ce46d5a9-55da-49c8-99c9-dd4a9000c70b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "81e1eabc4ba32923ce5d21161f4b5bc93000397e1484e9d4888648a14504fe68"
+  },
+  "nodeGroups": [],
+  "id": "yRv2bFKhtPVfTqK9",
+  "tags": []
+}
