@@ -1894,6 +1894,7 @@
       "id": "5c586582-76f1-480b-9fc5-205636f69a70",
       "name": "Send Duplicate Attachment Email",
       "webhookId": "88132316-bc87-4ec9-8dd4-f10ada5480bb",
+      "disabled": true,
       "credentials": {
         "gmailOAuth2": {
           "id": "8U48AonBtBxubvMr",
@@ -2185,6 +2186,41 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
+      }
+    },
+    {
+      "id": "2e370452-f397-42b5-af27-9cef65aef8fd",
+      "name": "Read Pagi Run Lock",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -656,
+        192
+      ],
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/Locks!A1:B1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "be328688-f7cb-48e2-b8b6-d3567e171e28",
+      "name": "Skip If Already Running",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -544,
+        192
+      ],
+      "parameters": {
+        "jsCode": "// Locks!B1 = waktu mulai Warehouse Pagi terakhir (ditulis Set Lock Running)\nconst GUARD_MS = 15 * 60 * 1000; // satu run butuh sekitar 4 menit\nconst row = ($json.values && $json.values[0]) || [];\nconst startedAt = row[1];\n\nif (startedAt) {\n  const age = Date.now() - new Date(startedAt).getTime();\n  if (age < GUARD_MS) return []; // run lain baru mulai -- stop, jadwal berikutnya cek lagi\n}\n\nreturn [{ json: $('Validate Email Attachment').first().json }];"
       }
     }
   ],
@@ -2958,7 +2994,7 @@
       "main": [
         [
           {
-            "node": "Search Cutoff Ready File",
+            "node": "Read Pagi Run Lock",
             "type": "main",
             "index": 0
           }
@@ -3116,15 +3152,40 @@
           }
         ]
       ]
+    },
+    "Read Pagi Run Lock": {
+      "main": [
+        [
+          {
+            "node": "Skip If Already Running",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip If Already Running": {
+      "main": [
+        [
+          {
+            "node": "Search Cutoff Ready File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "43b51d7a-151d-4aa5-a429-b60dc769cd85",
+  "versionId": "a6d233d9-7a94-4419-a4df-6c358f21b800",
   "meta": {
     "templateCredsSetupCompleted": true,
     "aiBuilderAssisted": true,
