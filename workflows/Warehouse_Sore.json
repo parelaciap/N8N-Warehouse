@@ -186,7 +186,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nconst lastRowData = $('Find Last Row Retur').first().json.values || [];\nconst nextRow = lastRowData.length + 1;\n\nfunction toNumberIfPossible(v) {\n  if (v === undefined || v === null || v === '') return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\nconst trimmed = [];\nfor (const item of items) {\n  const row = item.json.row || [];\n  const gin = row[0];\n  if (gin === undefined || gin === null || String(gin).trim() === '') break;\n  trimmed.push([row[0], row[1], row[2], row[8], row[11]]);\n}\n\nconst NUMERIC_COLS = [0, 1, 2, 3]; // GIN, PC, Barcode, Total pcs\nconst fixedRows = trimmed.map(row => {\n  const r = [...row];\n  for (const col of NUMERIC_COLS) r[col] = toNumberIfPossible(r[col]);\n  return r;\n});\n\nreturn [{ json: { values: fixedRows, nextRow } }];"
+        "jsCode": "const items = $input.all();\nconst lastRowData = $('Find Last Row Retur').first().json.values || [];\nconst nextRow = lastRowData.length + 1;\nconst tanggalUpload = $now.setZone('Asia/Makassar').toFormat('dd/MM/yyyy');\n\nfunction toNumberIfPossible(v) {\n  if (v === undefined || v === null || v === '') return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\nconst trimmed = [];\nfor (const item of items) {\n  const row = item.json.row || [];\n  const gin = row[0];\n  if (gin === undefined || gin === null || String(gin).trim() === '') break;\n  trimmed.push([row[0], row[1], row[2], row[8], tanggalUpload]);\n}\n\nconst NUMERIC_COLS = [0, 1, 2, 3]; // GIN, PC, Barcode, Total pcs\nconst fixedRows = trimmed.map(row => {\n  const r = [...row];\n  for (const col of NUMERIC_COLS) r[col] = toNumberIfPossible(r[col]);\n  return r;\n});\n\nreturn [{ json: { values: fixedRows, nextRow } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1706,7 +1706,7 @@
     "saveExecutionProgress": true,
     "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "e6df8a7b-9a39-4282-aece-39a254435190",
+  "versionId": "e26c6848-cf9a-4809-90e9-11dc2a571400",
   "meta": {
     "templateCredsSetupCompleted": true,
     "aiBuilderAssisted": true,
