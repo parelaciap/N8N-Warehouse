@@ -199,8 +199,8 @@
     },
     {
       "parameters": {
-        "method": "PUT",
-        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Validate Cutoff Match').first().json.fileId + '/values/' + encodeURIComponent('Retur!A' + $json.nextRow) }}",
+        "method": "POST",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $('Validate Cutoff Match').first().json.fileId + '/values/' + encodeURIComponent('Retur!A:E') + ':append' }}",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleSheetsOAuth2Api",
         "sendQuery": true,
@@ -209,6 +209,10 @@
             {
               "name": "valueInputOption",
               "value": "USER_ENTERED"
+            },
+            {
+              "name": "insertDataOption",
+              "value": "OVERWRITE"
             }
           ]
         },
@@ -553,7 +557,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const PERSONEL_MAP = { Rama: 1, Syaiful: 2, Rengga: 3, Sahar: 4 };\nconst personelName = $('Extract Attachment Name').first().json.personelName;\nconst personelCode = PERSONEL_MAP[personelName];\n\nconst stokopnameRows = $('Read STOKOPNAME Barcodes For Stok').first().json.values || [];\nif (stokopnameRows.length === 0) return [];\n\nconst existingStok = $('Read STOKOPNAME Existing Stok Akhir').first().json.values || [];\nconst alamatRows = $json.values || []; // Alamat!B2:L100000\n\nconst stokByBarcode = new Map();\nfor (const row of alamatRows) {\n  const barcode = row[0]; // B\n  if (barcode === undefined || barcode === null || String(barcode).trim() === '') continue;\n  const stokAkhir = row[8]; // J\n  stokByBarcode.set(String(barcode).trim(), stokAkhir);\n}\n\nconst values = stokopnameRows.map((row, i) => {\n  const barcode = row[0];       // kolom A STOKOPNAME\n  const rowPersonel = row[1];   // kolom B STOKOPNAME = Personel (udah ada dari awal)\n  const isThisPersonel = rowPersonel !== undefined && rowPersonel !== null && String(rowPersonel).trim() === String(personelCode);\n\n  if (isThisPersonel) {\n    const key = (barcode !== undefined && barcode !== null) ? String(barcode).trim() : '';\n    if (stokByBarcode.has(key)) return [ stokByBarcode.get(key) ];\n  }\n\n  const existing = (existingStok[i] && existingStok[i][0] !== undefined) ? existingStok[i][0] : '';\n  return [ existing ];\n});\n\nreturn [{ json: { values } }];"
+        "jsCode": "const PERSONEL_MAP = { Rama: 1, Syaiful: 2, Rengga: 3, Sahar: 4 };\nconst personelName = $('Extract Attachment Name').first().json.personelName;\nconst personelCode = String(PERSONEL_MAP[personelName]);\nconst colE = $('Resolve STOKOPNAME Columns').first().json.colE;\n\nconst stokopnameRows = $('Read STOKOPNAME Barcodes For Stok').first().json.values || [];\nif (stokopnameRows.length === 0) return [];\n\nconst alamatRows = $json.values || []; // Alamat!B2:L100000\n\nconst stokByBarcode = new Map();\nfor (const row of alamatRows) {\n  const barcode = row[0]; // B\n  if (barcode === undefined || barcode === null || String(barcode).trim() === '') continue;\n  const stokAkhir = row[8]; // J\n  stokByBarcode.set(String(barcode).trim(), stokAkhir);\n}\n\n// hanya sel milik personel ini, supaya upload bersamaan tidak saling menimpa\nconst data = [];\nstokopnameRows.forEach((row, i) => {\n  if (String(row[1] ?? '').trim() !== personelCode) return;\n  const key = String(row[0] ?? '').trim();\n  if (!stokByBarcode.has(key)) return;\n  const value = stokByBarcode.get(key);\n  if (value === undefined || value === null) return;\n  data.push({ range: 'STOKOPNAME!' + colE + (i + 3), values: [[value]] });\n});\n\nreturn [{ json: { data } }];"
       },
       "id": "a525d8e7-1f2a-4d14-93ea-ed25b712d802",
       "name": "Build Stok Akhir Values",
@@ -566,22 +570,13 @@
     },
     {
       "parameters": {
-        "method": "PUT",
-        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/STOKOPNAME!' + $('Resolve STOKOPNAME Columns').first().json.colE + '3' }}",
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values:batchUpdate",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleSheetsOAuth2Api",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "valueInputOption",
-              "value": "USER_ENTERED"
-            }
-          ]
-        },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ values: $json.values }) }}",
+        "jsonBody": "={{ JSON.stringify({ valueInputOption: 'USER_ENTERED', data: $json.data }) }}",
         "options": {}
       },
       "id": "4de51926-66af-408e-91c0-01798341ca1b",
@@ -1706,7 +1701,7 @@
     "saveExecutionProgress": true,
     "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "120c9676-f191-4a46-beb6-9b2e5b9760d5",
+  "versionId": "851917ec-d716-4221-98e1-9a443dd256d1",
   "meta": {
     "templateCredsSetupCompleted": true,
     "aiBuilderAssisted": true,
