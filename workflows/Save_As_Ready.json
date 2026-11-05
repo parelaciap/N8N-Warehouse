@@ -28,7 +28,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        672,
+        896,
         80
       ],
       "id": "bae90554-5aa5-439f-99f2-9ccab4cd22f5",
@@ -49,7 +49,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        896,
+        1120,
         0
       ],
       "id": "3dc1bf5e-649f-40c2-ae4f-25873cc564f8",
@@ -69,7 +69,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1120,
+        1344,
         0
       ],
       "id": "99707168-eeb7-456d-b529-672e5caffcd1",
@@ -77,32 +77,10 @@
     },
     {
       "parameters": {
-        "resource": "fileFolder",
-        "queryString": "={{ 'CUTOFF' }}",
-        "filter": {},
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
-      "position": [
-        1344,
-        0
-      ],
-      "id": "219be966-9bae-4fc4-9e91-6334142c596e",
-      "name": "Find Cutoff File For Pending",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "GE0qJ3jLbNoaRYmr",
-          "name": "Google Drive account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "operation": "copy",
         "fileId": {
           "__rl": true,
-          "value": "={{ $('Find Cutoff File For Pending').first().json.id }}",
+          "value": "={{ $('Read Active Cutoff').first().json.values[0][1] }}",
           "mode": "id"
         },
         "name": "={{ \"Starts 9 Dec 2025 (CUTOFF \" + $('Find Next Email').first().json.nextAttachmentName + \") Ready\" }}",
@@ -111,7 +89,7 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1792,
+        1568,
         0
       ],
       "id": "5ba6edff-94fe-41e0-a156-4fd1f3994fb4",
@@ -147,12 +125,12 @@
     },
     {
       "parameters": {
-        "jsCode": "const rows = $json.values || [];\nreturn rows\n  .slice(1) // lewati header\n  .filter(row => row[1] === 'pending')\n  .map((row, i) => ({ json: { attachmentName: row[0], rowNumber: i + 2 } }));"
+        "jsCode": "const active = ($json.values && $json.values[0]) || [];\nif (!active[0] || !active[1]) return []; // tidak ada file aktif, jangan buat Ready\n\nconst rows = $('Get Pending Cutoffs').first().json.values || [];\nreturn rows\n  .slice(1) // lewati header\n  .filter(row => row[1] === 'pending' && row[0] === active[0]) // hanya tanggal yang sedang aktif\n  .map((row, i) => ({ json: { attachmentName: row[0], rowNumber: i + 2 } }));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        448,
+        672,
         80
       ],
       "id": "d3f0168a-027a-4184-b5ba-da16f7ddf264",
@@ -168,7 +146,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        2240,
+        2016,
         0
       ],
       "id": "c9068c7e-428c-46c1-8349-bb14a9485bc7",
@@ -187,7 +165,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2464,
+        2240,
         0
       ],
       "id": "7b763a34-56da-4e8d-8092-7516f379ad9c",
@@ -204,7 +182,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        2688,
+        2464,
         0
       ],
       "id": "0f855fb8-5d54-4394-9970-41a8dd8d641b",
@@ -239,7 +217,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        2912,
+        2688,
         80
       ],
       "id": "843741cf-1934-4ff3-9594-a4f6ce59ee1e",
@@ -253,19 +231,6 @@
     },
     {
       "parameters": {
-        "jsCode": "const attachmentName = $('Find Next Email').first().json.attachmentName;\nconst files = $input.all();\nconst target = `CUTOFF ${attachmentName})`; // harus match persis pola \"...CUTOFF 6)...\"\n\nconst exact = files.find(f => f.json.name.includes(target));\n\nif (!exact) {\n  return []; // TIDAK ADA file yang cocok persis -- STOP, jangan asal ambil yang mirip\n}\n\nreturn [exact];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1568,
-        0
-      ],
-      "id": "3d1634b1-ad7c-4841-8596-aa035f488ddb",
-      "name": "Match Exact Cutoff File"
-    },
-    {
-      "parameters": {
         "method": "POST",
         "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/ActiveCutoff!A1:B1:clear",
         "authentication": "predefinedCredentialType",
@@ -275,11 +240,33 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        2016,
+        1792,
         0
       ],
       "id": "37eb54dd-56ae-4759-a0af-78c2de9b2ddf",
       "name": "Clear Active Cutoff Record",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1AgeSomcKgasweDkmWkodrPiJF7nxLpxgrYRh1BdYRIw/values/ActiveCutoff!A1:B1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "6ecc76a4-90c1-4f03-b77c-008513e9c80d",
+      "name": "Read Active Cutoff",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        80
+      ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -328,18 +315,7 @@
       "main": [
         [
           {
-            "node": "Find Cutoff File For Pending",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Find Cutoff File For Pending": {
-      "main": [
-        [
-          {
-            "node": "Match Exact Cutoff File",
+            "node": "Copy file",
             "type": "main",
             "index": 0
           }
@@ -361,7 +337,7 @@
       "main": [
         [
           {
-            "node": "Filter Pending Only",
+            "node": "Read Active Cutoff",
             "type": "main",
             "index": 0
           }
@@ -423,17 +399,6 @@
         ]
       ]
     },
-    "Match Exact Cutoff File": {
-      "main": [
-        [
-          {
-            "node": "Copy file",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Clear Active Cutoff Record": {
       "main": [
         [
@@ -444,15 +409,26 @@
           }
         ]
       ]
+    },
+    "Read Active Cutoff": {
+      "main": [
+        [
+          {
+            "node": "Filter Pending Only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": true
   },
-  "versionId": "378e9ae1-429e-41e3-9560-cc11d95af71d",
+  "versionId": "8b95c448-2698-4384-bedf-388567f997e4",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "81e1eabc4ba32923ce5d21161f4b5bc93000397e1484e9d4888648a14504fe68"

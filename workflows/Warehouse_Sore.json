@@ -238,7 +238,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $json;\nconst key = item.personelName + '__' + item.attachmentName;\nconst now = Date.now();\nconst FIFTEEN_DAYS_MS = 15 * 24 * 60 * 60 * 1000;\n\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.processedRetur) staticData.processedRetur = [];\n\n// buang entri yang sudah lebih dari 15 hari\nstaticData.processedRetur = staticData.processedRetur.filter(\n  entry => (now - entry.timestamp) < FIFTEEN_DAYS_MS\n);\n\n// cek apakah kombinasi ini sudah pernah diproses (dalam 15 hari terakhir)\nconst isDuplicate = staticData.processedRetur.some(entry => entry.key === key);\nif (isDuplicate) {\n  return []; // sudah pernah diproses, stop di sini\n}\n\n// catat sebagai baru diproses\nstaticData.processedRetur.push({ key, timestamp: now });\n\nreturn [item];"
+        "jsCode": "const item = $json;\nconst key = item.personelName + '__' + item.attachmentName;\nconst now = Date.now();\nconst FIFTEEN_DAYS_MS = 15 * 24 * 60 * 60 * 1000;\nconst REJECTED_4_BEFORE = Date.parse('2026-11-05T13:30:00Z'); // upload 4 yang tertolak saat ActiveCutoff kosong, boleh diproses ulang\n\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.processedRetur) staticData.processedRetur = [];\n\n// buang entri yang sudah lebih dari 15 hari\nstaticData.processedRetur = staticData.processedRetur.filter(\n  entry => (now - entry.timestamp) < FIFTEEN_DAYS_MS\n    && !(entry.key.endsWith('__4') && entry.timestamp < REJECTED_4_BEFORE)\n);\n\n// cek apakah kombinasi ini sudah pernah diproses (dalam 15 hari terakhir)\nconst isDuplicate = staticData.processedRetur.some(entry => entry.key === key);\nif (isDuplicate) {\n  return []; // sudah pernah diproses, stop di sini\n}\n\nreturn [item];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1210,6 +1210,19 @@
         2240,
         192
       ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// dicatat setelah tanggal terbukti cocok, supaya upload yang ditolak bisa diulang\nconst source = $('Extract Attachment Name').first().json;\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.processedRetur) staticData.processedRetur = [];\nstaticData.processedRetur.push({ key: source.personelName + '__' + source.attachmentName, timestamp: Date.now() });\nreturn $input.all();"
+      },
+      "id": "316a6ffc-4d80-4998-a1d3-365d90179747",
+      "name": "Mark Processed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        96
+      ]
     }
   ],
   "pinData": {},
@@ -1339,7 +1352,7 @@
       "main": [
         [
           {
-            "node": "Find Last Row Retur",
+            "node": "Mark Processed",
             "type": "main",
             "index": 0
           }
@@ -1358,11 +1371,6 @@
         [
           {
             "node": "Validate Cutoff Match",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Append Personel Progress",
             "type": "main",
             "index": 0
           }
@@ -1690,6 +1698,22 @@
           }
         ]
       ]
+    },
+    "Mark Processed": {
+      "main": [
+        [
+          {
+            "node": "Find Last Row Retur",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append Personel Progress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -1701,7 +1725,7 @@
     "saveExecutionProgress": true,
     "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "851917ec-d716-4221-98e1-9a443dd256d1",
+  "versionId": "3e5dbad6-57ed-4cd1-950d-914804f3111c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "aiBuilderAssisted": true,
