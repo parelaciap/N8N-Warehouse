@@ -1,0 +1,69 @@
+{
+  "name": "Warehouse Error Alert",
+  "nodes": [
+    {
+      "id": "98d147a7-fd39-49e4-8a6b-5a35d54cafa2",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "4879335e-9e1b-4f26-b1e3-03240bb54bde",
+      "name": "Send Failure Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "sendTo": "testerwhsl@gmail.com",
+        "subject": "={{ \"❌ Workflow Gagal - \" + $json.workflow.name }}",
+        "emailType": "text",
+        "message": "={{ \"Workflow: \" + $json.workflow.name + \"\\nNode terakhir: \" + ($json.execution.lastNodeExecuted || \"-\") + \"\\nPesan: \" + (($json.execution.error && $json.execution.error.message) || ($json.trigger && $json.trigger.error && $json.trigger.error.message) || \"-\") + \"\\nMulai: \" + (($json.execution.startedAt) || \"-\") + \"\\nEksekusi: \" + ($json.execution.url || \"-\") + \"\\nMode: \" + ($json.execution.mode || \"-\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "fe30892b-f704-43fd-ae99-93b1e1080fc3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8U48AonBtBxubvMr",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send Failure Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "versionId": "b1c25719-0149-4f60-a98b-e9b0550fae4f",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "nodeGroups": [],
+  "id": "kqzx1fd1JyikkFAX",
+  "tags": []
+}

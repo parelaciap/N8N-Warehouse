@@ -60,7 +60,10 @@
           "id": "8U48AonBtBxubvMr",
           "name": "Gmail account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -121,7 +124,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -156,7 +162,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -192,7 +201,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -227,7 +239,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -250,7 +265,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -272,7 +290,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     }
   ],
   "pinData": {},
@@ -426,9 +447,10 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "errorWorkflow": "kqzx1fd1JyikkFAX"
   },
-  "versionId": "8b95c448-2698-4384-bedf-388567f997e4",
+  "versionId": "77f6a62a-907c-4bbd-9bdd-a5bf1420b15e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "81e1eabc4ba32923ce5d21161f4b5bc93000397e1484e9d4888648a14504fe68"

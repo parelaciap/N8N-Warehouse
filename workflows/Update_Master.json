@@ -93,7 +93,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -141,7 +144,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -176,7 +182,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -258,7 +267,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -289,7 +301,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -324,7 +339,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -372,7 +390,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -506,7 +527,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -807,9 +831,10 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "errorWorkflow": "kqzx1fd1JyikkFAX"
   },
-  "versionId": "39e67398-10fc-423a-b25a-6449074284f9",
+  "versionId": "30c38666-392f-4759-b1c5-bdd59e9d8fa6",
   "meta": {
     "templateCredsSetupCompleted": true,
     "aiBuilderAssisted": true,

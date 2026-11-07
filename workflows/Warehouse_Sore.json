@@ -182,11 +182,14 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nconst lastRowData = $('Find Last Row Retur').first().json.values || [];\nconst nextRow = lastRowData.length + 1;\nconst tanggalUpload = $now.setZone('Asia/Makassar').toFormat('dd/MM/yyyy');\n\nfunction toNumberIfPossible(v) {\n  if (v === undefined || v === null || v === '') return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\nconst trimmed = [];\nfor (const item of items) {\n  const row = item.json.row || [];\n  const gin = row[0];\n  if (gin === undefined || gin === null || String(gin).trim() === '') break;\n  trimmed.push([row[0], row[1], row[2], row[8], tanggalUpload]);\n}\n\nconst NUMERIC_COLS = [0, 1, 2, 3]; // GIN, PC, Barcode, Total pcs\nconst fixedRows = trimmed.map(row => {\n  const r = [...row];\n  for (const col of NUMERIC_COLS) r[col] = toNumberIfPossible(r[col]);\n  return r;\n});\n\nreturn [{ json: { values: fixedRows, nextRow } }];"
+        "jsCode": "const items = $input.all();\nconst lastRowData = $('Find Last Row Retur').first().json.values || [];\nconst nextRow = lastRowData.length + 1;\nconst tanggalUpload = $now.setZone('Asia/Makassar').toFormat('dd/MM/yyyy');\n\nfunction toNumberIfPossible(v) {\n  if (v === undefined || v === null || v === '') return v;\n  const n = Number(String(v).replace(/[^0-9.\\-]/g, ''));\n  return (!isNaN(n) && String(v).trim() !== '') ? n : v;\n}\n\nconst trimmed = [];\nfor (const item of items) {\n  const row = item.json.row || [];\n  const gin = row[0];\n  if (gin === undefined || gin === null || String(gin).trim() === '') break;\n  trimmed.push([row[0], row[1], row[2], row[8], tanggalUpload]);\n}\n\nconst NUMERIC_COLS = [0, 1, 2, 3]; // GIN, PC, Barcode, Total pcs\nconst fixedRows = trimmed.map(row => {\n  const r = [...row];\n  for (const col of NUMERIC_COLS) r[col] = toNumberIfPossible(r[col]);\n  return r;\n});\n\n// Retur upload ini sudah tertulis di run yang gagal di tengah, jangan tulis lagi\nconst source = $('Extract Attachment Name').first().json;\nconst returKey = 'retur__' + source.personelName + '__' + source.attachmentName;\nconst sudahTertulis = ($getWorkflowStaticData('global').processedRetur || []).some(e => e.key === returKey);\n\nreturn [{ json: { values: sudahTertulis ? [] : fixedRows, nextRow } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -308,7 +311,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -330,7 +336,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -474,7 +483,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -509,7 +521,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -531,7 +546,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -553,7 +571,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -592,7 +613,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -614,7 +638,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -653,7 +680,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -692,7 +722,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -714,7 +747,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -796,7 +832,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -831,7 +870,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -919,7 +961,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -942,7 +987,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -965,7 +1013,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -988,7 +1039,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -1010,7 +1064,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -1036,7 +1093,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -1064,7 +1124,10 @@
           "id": "GE0qJ3jLbNoaRYmr",
           "name": "Google Drive account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -1119,7 +1182,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -1158,7 +1224,10 @@
           "id": "jf4LEtBwHwtJwj37",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -1202,9 +1271,22 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1232,
-        96
+        672,
+        576
       ]
+    },
+    {
+      "id": "d8e97a4d-2424-4302-bba6-780493d1b493",
+      "name": "Mark Retur Written",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2576,
+        32
+      ],
+      "parameters": {
+        "jsCode": "// supaya upload ulang setelah gagal di tengah tidak menulis Retur dua kali\nconst source = $('Extract Attachment Name').first().json;\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.processedRetur) staticData.processedRetur = [];\nstaticData.processedRetur.push({ key: 'retur__' + source.personelName + '__' + source.attachmentName, timestamp: Date.now() });\nreturn $input.all();"
+      }
     }
   ],
   "pinData": {},
@@ -1337,6 +1419,11 @@
             "node": "Mark Processed",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Find Last Row Retur",
+            "type": "main",
+            "index": 0
           }
         ],
         [
@@ -1451,7 +1538,7 @@
       "main": [
         [
           {
-            "node": "Read ActiveCutoff Stokopname State",
+            "node": "Mark Retur Written",
             "type": "main",
             "index": 0
           }
@@ -1685,12 +1772,18 @@
       "main": [
         [
           {
-            "node": "Find Last Row Retur",
+            "node": "Append Personel Progress",
             "type": "main",
             "index": 0
-          },
+          }
+        ]
+      ]
+    },
+    "Mark Retur Written": {
+      "main": [
+        [
           {
-            "node": "Append Personel Progress",
+            "node": "Read ActiveCutoff Stokopname State",
             "type": "main",
             "index": 0
           }
@@ -1705,9 +1798,10 @@
     "availableInMCP": true,
     "timeSavedMode": "fixed",
     "saveExecutionProgress": true,
-    "callerPolicy": "workflowsFromSameOwner"
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "kqzx1fd1JyikkFAX"
   },
-  "versionId": "1e34a225-ed60-47f3-a1a6-dd2c344994fb",
+  "versionId": "3d7890ea-34ba-4763-9948-ec30fb8d5dc2",
   "meta": {
     "templateCredsSetupCompleted": true,
     "aiBuilderAssisted": true,

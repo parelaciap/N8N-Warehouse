@@ -11,7 +11,7 @@
       "typeVersion": 1.1,
       "position": [
         352,
-        432
+        336
       ]
     },
     {
@@ -38,7 +38,7 @@
       "typeVersion": 3,
       "position": [
         576,
-        432
+        336
       ],
       "executeOnce": true,
       "credentials": {
@@ -58,7 +58,7 @@
       "typeVersion": 2,
       "position": [
         800,
-        432
+        336
       ]
     },
     {
@@ -82,7 +82,7 @@
       "typeVersion": 3,
       "position": [
         1024,
-        432
+        336
       ],
       "retryOnFail": true,
       "credentials": {
@@ -102,7 +102,7 @@
       "typeVersion": 2,
       "position": [
         1472,
-        432
+        336
       ]
     },
     {
@@ -129,6 +129,7 @@
       ],
       "retryOnFail": true,
       "waitBetweenTries": 5000,
+      "maxTries": 3,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -290,8 +291,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        2368,
-        768
+        3040,
+        864
       ],
       "id": "7b463b4b-98fd-41a0-969b-183df4fddab9",
       "name": "Copy Cutoff Template",
@@ -333,7 +334,7 @@
       "typeVersion": 3,
       "position": [
         1248,
-        432
+        336
       ],
       "executeOnce": true,
       "credentials": {
@@ -353,11 +354,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2592,
+        2368,
         768
       ],
       "id": "5b091b1b-be43-46b7-ad3b-5d555a4bc2da",
       "name": "Read Transaksi Summary",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -372,7 +376,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2816,
+        2592,
         768
       ],
       "id": "c43ac401-003f-4f2c-94d9-2bd6de38ceab",
@@ -389,11 +393,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3264,
-        960
+        3488,
+        1008
       ],
       "id": "e40986dc-a106-4e7c-a7dd-781d82a792e3",
       "name": "Clear Rekap Harian",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -424,11 +431,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3488,
+        3712,
         1008
       ],
       "id": "2e9c205a-4a14-4868-b395-a8515666702c",
       "name": "Write Rekap Harian",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -465,7 +475,7 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        3712,
+        3936,
         912
       ],
       "id": "bb1a4688-4d4f-4fcf-a13b-e19748f18527",
@@ -487,11 +497,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3936,
+        4160,
         912
       ],
       "id": "6d0d2ab2-0aa3-4a30-b1ce-d78a9b78d0a2",
       "name": "Read Cutoff Calc",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -510,11 +523,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        4608,
+        4832,
         912
       ],
       "id": "82cbbff8-e03b-43d0-8157-ddb3599e8b2e",
       "name": "Clear Pengambilan Calc",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -545,11 +561,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        4832,
+        5056,
         912
       ],
       "id": "4801728d-4b41-4695-83b5-5a97008fea5d",
       "name": "Write Pengambilan Calc",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -564,7 +583,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3040,
+        3264,
         960
       ],
       "id": "e023bb0e-2a51-4b71-ac8d-edfa3576dd66",
@@ -577,7 +596,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4160,
+        4384,
         912
       ],
       "id": "d37dc884-e3d6-4928-bd8f-990c3c07a637",
@@ -590,7 +609,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4384,
+        4608,
         912
       ],
       "id": "14976a0f-d4cd-45ef-876a-81c1a42cddb4",
@@ -606,11 +625,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        5056,
+        5280,
         1376
       ],
       "id": "80fb651d-be69-486d-9eb4-eccb5997c91c",
       "name": "Read Calc + Personel",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -625,7 +647,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5280,
+        5504,
         1472
       ],
       "id": "4bff0517-5217-4d66-89dc-57470a8d9fab",
@@ -638,7 +660,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        5504,
+        5728,
         1376
       ],
       "id": "041a45a4-3b1c-4b04-bd07-b1136bfb6394",
@@ -655,11 +677,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        5728,
+        5952,
         1296
       ],
       "id": "3a091678-07a2-46b3-b7b0-dd264dfb1235",
       "name": "Clear Personel Sheet",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -690,11 +715,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        5952,
+        6176,
         1376
       ],
       "id": "73abfd33-dff8-42d1-afe2-d8714e1acb33",
       "name": "Write Personel Sheet",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -730,7 +758,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        5504,
+        5728,
         1104
       ],
       "id": "36937c81-5410-4200-814d-c781e9fa1b97",
@@ -743,7 +771,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5280,
+        5504,
         1104
       ],
       "id": "4b2f24db-9e8d-428f-b3d0-1bada9cb7b47",
@@ -759,7 +787,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        5728,
+        5952,
         1104
       ],
       "id": "c1dc362d-92b4-42ae-82eb-046f822f376e",
@@ -782,7 +810,7 @@
       "typeVersion": 3,
       "position": [
         1696,
-        432
+        336
       ]
     },
     {
@@ -814,7 +842,7 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        5504,
+        5728,
         1616
       ],
       "id": "7f5f28a0-2f3b-4459-9650-5ed2b04fd25b",
@@ -834,7 +862,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5728,
+        5952,
         1616
       ],
       "id": "2f7fc133-5df7-4a64-aa4e-88f4c2cbdeea",
@@ -847,7 +875,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5952,
+        6176,
         1616
       ],
       "id": "dea18d0d-6b40-4240-858d-86ab4a084fd6",
@@ -860,7 +888,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        6176,
+        6400,
         1616
       ],
       "id": "5d6362ab-9e22-4c0e-bfca-593639429c6a",
@@ -877,11 +905,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        6400,
+        6624,
         1056
       ],
       "id": "1896fe93-5618-4495-9780-14b2efcceed2",
       "name": "Clear Telian Sheet",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -912,11 +943,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        6624,
+        6848,
         1616
       ],
       "id": "70d68f65-f0c2-45ce-a8e0-9e930d81b8e1",
       "name": "Write Telian Sheet",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -952,6 +986,9 @@
         3264,
         0
       ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -988,7 +1025,7 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        3712,
+        3936,
         432
       ],
       "id": "9473b83b-9332-4534-8c6e-cc06580a53e9",
@@ -1024,11 +1061,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3936,
+        4160,
         432
       ],
       "id": "d86fb6a3-8f53-4659-84f8-009d4b3f70ec",
       "name": "Write A1 Penyiapan",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1046,11 +1086,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        4160,
+        4384,
         432
       ],
       "id": "d04b6caa-afe7-4461-a337-85ce532ee9be",
       "name": "Read Cutoff Rekap Harian",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1065,7 +1108,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4384,
+        4608,
         432
       ],
       "id": "be8784b2-d0b9-47d6-9f69-458271310b2c",
@@ -1082,11 +1125,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        4608,
+        4832,
         336
       ],
       "id": "1932841a-1d10-4d18-9796-6c5a94fd8ba3",
       "name": "Clear Penyiapan Rekap Harian",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1117,11 +1163,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        4832,
+        5056,
         336
       ],
       "id": "406c665c-3f41-46c2-a4bb-e1797da2918e",
       "name": "Write Penyiapan Rekap Harian",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1139,11 +1188,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        5056,
+        5280,
         336
       ],
       "id": "63970dbc-adec-4975-8af8-3d40d34af6eb",
       "name": "Get Penyiapan Sheet Metadata",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1165,11 +1217,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        5280,
+        5504,
         336
       ],
       "id": "22823666-6894-4add-b690-ea4b672168fd",
       "name": "Hide Columns E F I",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1187,11 +1242,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        5056,
+        5280,
         912
       ],
       "id": "b443321e-09bb-40aa-bf02-c27246386455",
       "name": "Read Pengambilan Calc For Penerimaan",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1209,11 +1267,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        5280,
+        5504,
         912
       ],
       "id": "ee30597a-5637-41cb-9a92-145564460580",
       "name": "Find Last Row Penerimaan Barang",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1228,7 +1289,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5504,
+        5728,
         912
       ],
       "id": "dcb51bbc-335a-42a4-893c-42b1156f225d",
@@ -1257,11 +1318,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        5728,
+        5952,
         912
       ],
       "id": "dae385b3-c1cf-44b5-882b-d317e02b2c85",
       "name": "Write Penerimaan Barang",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1279,11 +1343,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        5056,
+        5280,
         720
       ],
       "id": "3361eae7-644e-462b-8303-b4060a30860e",
       "name": "Find Last Row Penjualan",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1298,7 +1365,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5280,
+        5504,
         720
       ],
       "id": "27ba1a7e-9950-4b6a-889e-76fc511d7c21",
@@ -1327,11 +1394,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        5504,
+        5728,
         720
       ],
       "id": "6a520d4e-1ac9-4b8e-be20-9843ea93b267",
       "name": "Write Penjualan",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1346,7 +1416,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4608,
+        4832,
         528
       ],
       "id": "db358493-1656-41a4-ba60-0db4ef50dc2f",
@@ -1380,7 +1450,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        4832,
+        5056,
         528
       ],
       "id": "d800744a-5ee2-4cae-a160-7ac4bdb026f5",
@@ -1396,7 +1466,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        5056,
+        5280,
         528
       ],
       "id": "f02f85e9-e600-4c3b-9679-b5c577afaeaa",
@@ -1428,10 +1498,13 @@
       "typeVersion": 3,
       "position": [
         -96,
-        336
+        240
       ],
       "id": "8d087e70-966c-418b-8609-e2daeb11e91d",
       "name": "Search Cutoff Ready File",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleDriveOAuth2Api": {
           "id": "GE0qJ3jLbNoaRYmr",
@@ -1447,7 +1520,7 @@
       "typeVersion": 2,
       "position": [
         128,
-        336
+        240
       ],
       "id": "33a77a58-ace0-4880-96a1-d4c10bdad42a",
       "name": "Reattach Binary For Compression"
@@ -1481,7 +1554,7 @@
       "typeVersion": 2.3,
       "position": [
         3040,
-        672
+        576
       ],
       "id": "4af388c2-e6e2-49c2-b31f-b499d27315ac",
       "name": "Ada PC Tidak Terdaftar?"
@@ -1497,7 +1570,7 @@
       "typeVersion": 2.2,
       "position": [
         3264,
-        672
+        576
       ],
       "id": "ccf69af3-f36f-4e2f-8b17-a8af9aa46088",
       "name": "Send Missing PC Email",
@@ -1533,10 +1606,13 @@
       "typeVersion": 4.5,
       "position": [
         352,
-        240
+        144
       ],
       "id": "34a0c63e-f47c-4b90-8efd-624bbd437289",
       "name": "Set Lock Running",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1567,11 +1643,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        2592,
-        960
+        3936,
+        1104
       ],
       "id": "e2609a22-0f1f-40b8-9090-31f33b4a712e",
       "name": "Set Active Cutoff",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1608,7 +1687,7 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        5504,
+        5728,
         336
       ],
       "id": "cf5fbe27-e693-421e-901e-89d48bef17d4",
@@ -1630,11 +1709,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        5728,
+        5952,
         336
       ],
       "id": "5aec56ca-93f0-4113-a3a4-58c58171c4d1",
       "name": "Read Penyiapan A1",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1652,11 +1734,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        5952,
+        6176,
         336
       ],
       "id": "95c27854-78e8-4a54-9900-11807ea92b1d",
       "name": "Read Penyiapan Data",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1671,7 +1756,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6176,
+        6400,
         336
       ],
       "id": "26caea0c-b660-4690-a4c9-9c356b553777",
@@ -1700,11 +1785,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        6400,
+        6624,
         336
       ],
       "id": "8f4199d1-002b-47f1-b599-6d8c27e20bff",
       "name": "Write Telian Tanggal",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1723,11 +1811,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        6624,
+        6848,
         336
       ],
       "id": "baa1caaf-8317-4e43-8dd9-8028248c7991",
       "name": "Clear Telian Rekap Harian",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1758,11 +1849,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        6848,
+        7072,
         336
       ],
       "id": "8d3ed145-07bb-4273-9391-45e05de103f6",
       "name": "Write Telian Rekap Harian",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1781,10 +1875,13 @@
       "typeVersion": 4.5,
       "position": [
         -1216,
-        432
+        336
       ],
       "id": "aa099c0d-330f-484f-9c3b-9d08793e9d91",
       "name": "Read Processed Attachments",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -1800,7 +1897,7 @@
       "typeVersion": 2,
       "position": [
         -992,
-        432
+        336
       ],
       "id": "7749765d-2994-47a3-9a67-45bb30d19465",
       "name": "Validate Email Attachment"
@@ -1834,7 +1931,7 @@
       "typeVersion": 2.3,
       "position": [
         -768,
-        432
+        336
       ],
       "id": "9f23e7cd-3f95-47dd-9bba-8191765aa2b2",
       "name": "Attachment Valid?"
@@ -1866,7 +1963,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        3712,
+        4384,
         1104
       ],
       "id": "932ed385-8636-4c1a-bb52-e9e0de2a2303",
@@ -1889,7 +1986,7 @@
       "typeVersion": 2.2,
       "position": [
         -544,
-        528
+        432
       ],
       "id": "5c586582-76f1-480b-9fc5-205636f69a70",
       "name": "Send Duplicate Attachment Email",
@@ -1906,14 +2003,14 @@
       "parameters": {
         "sendTo": "testerwhsl@gmail.com",
         "subject": "✅ Warehouse Pagi Sudah Diproses",
-        "message": "Proses Warehouse Pagi hari ini sudah dimulai dan file Cutoff aktif sudah dibuat.",
+        "message": "Proses Warehouse Pagi hari ini sudah selesai dan file Cutoff aktif sudah siap.",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        2816,
-        960
+        4608,
+        1104
       ],
       "id": "ceebe093-ab8e-4956-8510-5fce1f267107",
       "name": "Send Completion Email",
@@ -1954,7 +2051,7 @@
       "typeVersion": 1.3,
       "position": [
         -1664,
-        432
+        336
       ]
     },
     {
@@ -1978,9 +2075,12 @@
       "typeVersion": 2.2,
       "position": [
         -1440,
-        432
+        336
       ],
       "webhookId": "33f2da38-de28-4bd7-9ad4-1485e0441645",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "gmailOAuth2": {
           "id": "8U48AonBtBxubvMr",
@@ -2146,7 +2246,7 @@
       "typeVersion": 2,
       "position": [
         1920,
-        368
+        192
       ]
     },
     {
@@ -2170,7 +2270,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ values: $json.ginsToLog.map(g => [g, $('Copy Transaksi').first().json.name]) }) }}",
+        "jsonBody": "={{ JSON.stringify({ values: $('Cek GIN Masuk Penjualan').first().json.ginsToLog.map(g => [g, $('Copy Transaksi').first().json.name]) }) }}",
         "options": {}
       },
       "id": "f1a21d71-462a-453e-9fb1-cacfe1287422",
@@ -2178,8 +2278,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        5728,
-        720
+        4160,
+        1104
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -2201,8 +2301,11 @@
       "typeVersion": 4.5,
       "position": [
         -544,
-        336
+        240
       ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "jf4LEtBwHwtJwj37",
@@ -2220,18 +2323,10 @@
       "typeVersion": 2,
       "position": [
         -320,
-        336
+        240
       ]
     },
     {
-      "id": "86f4bca4-e42a-4bb4-af78-3cba0d3c6622",
-      "name": "Summary Lengkap?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        2928,
-        912
-      ],
       "parameters": {
         "conditions": {
           "options": {
@@ -2255,23 +2350,31 @@
           "combinator": "and"
         },
         "options": {}
-      }
+      },
+      "id": "86f4bca4-e42a-4bb4-af78-3cba0d3c6622",
+      "name": "Summary Lengkap?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2816,
+        768
+      ]
     },
     {
-      "id": "24d0a52b-b90e-447b-8efa-0cc70c493d89",
-      "name": "Send Incomplete Summary Email",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        3152,
-        1056
-      ],
       "parameters": {
         "sendTo": "testerwhsl@gmail.com",
         "subject": "={{ '⚠️ Warehouse Pagi Dihentikan - GIN/Nama Kosong - ' + $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') }}",
         "message": "={{ $json.incompleteHtml }}",
         "options": {}
       },
+      "id": "24d0a52b-b90e-447b-8efa-0cc70c493d89",
+      "name": "Send Incomplete Summary Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3040,
+        1056
+      ],
       "webhookId": "dc04e29b-dc60-4fe4-b76a-3af30f51365f",
       "credentials": {
         "gmailOAuth2": {
@@ -2281,27 +2384,19 @@
       }
     },
     {
+      "parameters": {
+        "jsCode": "const newGins = $('Build Loop Summary').first().json.newGins || [];\nconst written = $('Build Penjualan Rows').first().json.values || [];\nconst writtenGins = new Set(written.map(row => String(row[0] ?? '').trim()));\n\nconst ginsToLog = newGins.filter(g => writtenGins.has(String(g).trim()));\nconst missingGins = newGins.filter(g => !writtenGins.has(String(g).trim()));\n\nconst attachmentName = $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '');\nconst missingHtml = `\n  <p>Ada <b>${missingGins.length}</b> GIN dari ${attachmentName} yang tidak masuk ke tab Penjualan:</p>\n  <ul>${missingGins.map(g => `<li>${g}</li>`).join('')}</ul>\n  <p>GIN ini tidak dicatat sebagai sudah diproses. Cek format tab-nya di file Rekap Calc, lalu proses ulang secara manual karena lampiran ini sudah tercatat selesai.</p>\n`;\n\nreturn [{ json: { ginsToLog, missingGins, hasMissingGins: missingGins.length > 0, missingHtml } }];\n"
+      },
       "id": "c417a9ba-b0ac-42c0-99bf-9b7afb2f6741",
       "name": "Cek GIN Masuk Penjualan",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5616,
-        880
-      ],
-      "parameters": {
-        "jsCode": "const newGins = $('Build Loop Summary').first().json.newGins || [];\nconst written = $('Build Penjualan Rows').first().json.values || [];\nconst writtenGins = new Set(written.map(row => String(row[0] ?? '').trim()));\n\nconst ginsToLog = newGins.filter(g => writtenGins.has(String(g).trim()));\nconst missingGins = newGins.filter(g => !writtenGins.has(String(g).trim()));\n\nconst attachmentName = $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '');\nconst missingHtml = `\n  <p>Ada <b>${missingGins.length}</b> GIN dari ${attachmentName} yang tidak masuk ke tab Penjualan:</p>\n  <ul>${missingGins.map(g => `<li>${g}</li>`).join('')}</ul>\n  <p>GIN ini tidak dicatat sebagai sudah diproses. Cek format tab-nya di file Rekap Calc, lalu proses ulang secara manual karena lampiran ini sudah tercatat selesai.</p>\n`;\n\nreturn [{ json: { ginsToLog, missingGins, hasMissingGins: missingGins.length > 0, missingHtml } }];\n"
-      }
+        5952,
+        720
+      ]
     },
     {
-      "id": "e18ff8de-d628-47cd-a650-ba58f3d6cb1f",
-      "name": "Ada GIN Tidak Masuk?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        5840,
-        976
-      ],
       "parameters": {
         "conditions": {
           "options": {
@@ -2325,23 +2420,31 @@
           "combinator": "and"
         },
         "options": {}
-      }
+      },
+      "id": "e18ff8de-d628-47cd-a650-ba58f3d6cb1f",
+      "name": "Ada GIN Tidak Masuk?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        6176,
+        912
+      ]
     },
     {
-      "id": "42b10a51-8fd8-4271-98f6-c32182015de6",
-      "name": "Send Missing GIN Email",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        6064,
-        976
-      ],
       "parameters": {
         "sendTo": "testerwhsl@gmail.com",
         "subject": "={{ '⚠️ GIN Tidak Masuk Penjualan - ' + $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') }}",
         "message": "={{ $json.missingHtml }}",
         "options": {}
       },
+      "id": "42b10a51-8fd8-4271-98f6-c32182015de6",
+      "name": "Send Missing GIN Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        6400,
+        912
+      ],
       "webhookId": "4af9dc20-b1cf-4b82-9844-3aeecbc89c0e",
       "credentials": {
         "gmailOAuth2": {
@@ -2521,7 +2624,7 @@
             "index": 0
           },
           {
-            "node": "Log Processed Attachment",
+            "node": "Set Active Cutoff",
             "type": "main",
             "index": 0
           }
@@ -3103,17 +3206,6 @@
         ]
       ]
     },
-    "Set Active Cutoff": {
-      "main": [
-        [
-          {
-            "node": "Send Completion Email",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Search Cutoff Ready File": {
       "main": [
         [
@@ -3297,11 +3389,6 @@
       "main": [
         [
           {
-            "node": "Set Active Cutoff",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Fix Barcode Number (Rekap Harian)",
             "type": "main",
             "index": 0
@@ -3324,11 +3411,6 @@
       "main": [
         [
           {
-            "node": "Log Processed GINs",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Ada GIN Tidak Masuk?",
             "type": "main",
             "index": 0
@@ -3346,6 +3428,39 @@
           }
         ]
       ]
+    },
+    "Log Processed GINs": {
+      "main": [
+        [
+          {
+            "node": "Log Processed Attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Processed Attachment": {
+      "main": [
+        [
+          {
+            "node": "Send Completion Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Active Cutoff": {
+      "main": [
+        [
+          {
+            "node": "Log Processed GINs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -3355,14 +3470,14 @@
     "availableInMCP": true,
     "timeSavedMode": "fixed",
     "saveExecutionProgress": true,
-    "callerPolicy": "workflowsFromSameOwner"
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "kqzx1fd1JyikkFAX"
   },
-  "versionId": "33538679-8b4e-4b1d-916f-96be6aab0872",
+  "versionId": "e91be31c-0472-4268-acb4-9b347dbb479b",
   "meta": {
     "templateCredsSetupCompleted": true,
     "aiBuilderAssisted": true,
-    "builderVariant": "mcp",
-    "instanceId": "81e1eabc4ba32923ce5d21161f4b5bc93000397e1484e9d4888648a14504fe68"
+    "builderVariant": "mcp"
   },
   "nodeGroups": [],
   "id": "Yuv1uicEAQX3Ws4G",
