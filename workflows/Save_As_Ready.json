@@ -448,12 +448,16 @@
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
     "errorWorkflow": "kqzx1fd1JyikkFAX"
   },
   "versionId": "77f6a62a-907c-4bbd-9bdd-a5bf1420b15e",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "81e1eabc4ba32923ce5d21161f4b5bc93000397e1484e9d4888648a14504fe68"
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
   },
   "nodeGroups": [],
   "id": "89S8hAnpoA4Em6c7",
