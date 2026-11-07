@@ -2063,6 +2063,73 @@
         1024,
         1536
       ]
+    },
+    {
+      "id": "e2a6c436-5e75-49b4-9acb-5b390d4d2956",
+      "name": "ActiveCutoff Terisi?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        1312
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3fa1d7c4-6b28-4e19-a0c5-8d9e7f6a5b41",
+              "leftValue": "={{ ($json.values && $json.values[0] && $json.values[0][0]) || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "a9bb6b0d-868f-4d77-9f13-37e51bc8e4a5",
+      "name": "File Telian Ada?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        16,
+        1312
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9e2b6c13-4d7a-4a58-b3f1-1c0d2e3f4a67",
+              "leftValue": "={{ ($json.files || []).length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
     }
   ],
   "pinData": {},
@@ -2814,28 +2881,6 @@
         ]
       ]
     },
-    "Read Active Cutoff For Telian": {
-      "main": [
-        [
-          {
-            "node": "Find Telian Pengambilan File",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Find Telian Pengambilan File": {
-      "main": [
-        [
-          {
-            "node": "Read Telian Kirim Flags",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Read Telian Kirim Flags": {
       "main": [
         [
@@ -2917,15 +2962,59 @@
           }
         ]
       ]
+    },
+    "Read Active Cutoff For Telian": {
+      "main": [
+        [
+          {
+            "node": "ActiveCutoff Terisi?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ActiveCutoff Terisi?": {
+      "main": [
+        [
+          {
+            "node": "Find Telian Pengambilan File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Telian Pengambilan File": {
+      "main": [
+        [
+          {
+            "node": "File Telian Ada?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Telian Ada?": {
+      "main": [
+        [
+          {
+            "node": "Read Telian Kirim Flags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": true
   },
-  "versionId": "0302a9cd-cfd6-455d-b225-deac93be86bf",
+  "versionId": "0aaeb488-8afa-4fae-88ed-bdb96bc112f1",
   "meta": {
     "templateCredsSetupCompleted": true,
     "aiBuilderAssisted": true,
