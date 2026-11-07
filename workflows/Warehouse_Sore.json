@@ -618,7 +618,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const stokopnameRows = $('Read STOKOPNAME Barcodes For Stok').first().json.values || [];\nif (stokopnameRows.length === 0) return [];\n\nconst formulas = stokopnameRows.map((_, i) => {\n  const row = i + 3; // range mulai A3\n  return [ `=IFERROR(VLOOKUP(A${row};PIVOT!B:C;2;0);0)` ];\n});\n\nreturn [{ json: { formulas } }];"
+        "jsCode": "const PERSONEL_MAP = { Rama: 1, Syaiful: 2, Rengga: 3, Sahar: 4 };\nconst personelCode = String(PERSONEL_MAP[$('Extract Attachment Name').first().json.personelName]);\nconst colF = $('Resolve STOKOPNAME Columns').first().json.colF;\nconst stokopnameRows = $('Read STOKOPNAME Barcodes For Stok').first().json.values || [];\n\n// hanya baris milik personel ini, supaya upload terlambat tidak mengembalikan value lain jadi rumus\nconst data = [];\nstokopnameRows.forEach((row, i) => {\n  if (String(row[1] ?? '').trim() !== personelCode) return;\n  const r = i + 3; // range mulai A3\n  data.push({ range: 'STOKOPNAME!' + colF + r, values: [[`=IFERROR(VLOOKUP(A${r};PIVOT!B:C;2;0);0)`]] });\n});\n\nif (data.length === 0) return [];\nreturn [{ json: { data } }];\n"
       },
       "id": "d156542a-7280-466c-8d45-8764e97711fb",
       "name": "Build STOKOPNAME Formulas",
@@ -631,22 +631,13 @@
     },
     {
       "parameters": {
-        "method": "PUT",
-        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/STOKOPNAME!' + $('Resolve STOKOPNAME Columns').first().json.colF + '3' }}",
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values:batchUpdate",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleSheetsOAuth2Api",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "valueInputOption",
-              "value": "USER_ENTERED"
-            }
-          ]
-        },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ values: $json.formulas }) }}",
+        "jsonBody": "={{ JSON.stringify({ valueInputOption: 'USER_ENTERED', data: $json.data }) }}",
         "options": {}
       },
       "id": "f88d0a57-7d10-4a68-bcc7-60f53d91553a",
@@ -666,7 +657,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cols = $('Resolve STOKOPNAME Columns').first().json;\nconst stokopnameRows = $('Read STOKOPNAME Barcodes For Stok').first().json.values || [];\nif (stokopnameRows.length === 0) return [];\n\nconst formulas = stokopnameRows.map((_, i) => {\n  const row = i + 3; // range mulai A3\n  return [ `=${cols.colF}${row}-${cols.colE}${row}` ];\n});\n\nreturn [{ json: { formulas } }];"
+        "jsCode": "const PERSONEL_MAP = { Rama: 1, Syaiful: 2, Rengga: 3, Sahar: 4 };\nconst personelCode = String(PERSONEL_MAP[$('Extract Attachment Name').first().json.personelName]);\nconst cols = $('Resolve STOKOPNAME Columns').first().json;\nconst stokopnameRows = $('Read STOKOPNAME Barcodes For Stok').first().json.values || [];\n\n// hanya baris milik personel ini, sama seperti Build STOKOPNAME Formulas\nconst data = [];\nstokopnameRows.forEach((row, i) => {\n  if (String(row[1] ?? '').trim() !== personelCode) return;\n  const r = i + 3; // range mulai A3\n  data.push({ range: 'STOKOPNAME!' + cols.colG + r, values: [[`=${cols.colF}${r}-${cols.colE}${r}`]] });\n});\n\nif (data.length === 0) return [];\nreturn [{ json: { data } }];\n"
       },
       "id": "75f34969-aaeb-4a86-9264-113671c9c2ab",
       "name": "Build STOKOPNAME Selisih Formulas",
@@ -679,22 +670,13 @@
     },
     {
       "parameters": {
-        "method": "PUT",
-        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values/STOKOPNAME!' + $('Resolve STOKOPNAME Columns').first().json.colG + '3' }}",
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U/values:batchUpdate",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleSheetsOAuth2Api",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "valueInputOption",
-              "value": "USER_ENTERED"
-            }
-          ]
-        },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ values: $json.formulas }) }}",
+        "jsonBody": "={{ JSON.stringify({ valueInputOption: 'USER_ENTERED', data: $json.data }) }}",
         "options": {}
       },
       "id": "ce2a3fbf-da09-4d3d-a790-15aab7e8fdbc",
@@ -1725,7 +1707,7 @@
     "saveExecutionProgress": true,
     "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "3e5dbad6-57ed-4cd1-950d-914804f3111c",
+  "versionId": "1e34a225-ed60-47f3-a1a6-dd2c344994fb",
   "meta": {
     "templateCredsSetupCompleted": true,
     "aiBuilderAssisted": true,
