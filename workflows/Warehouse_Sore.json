@@ -1287,6 +1287,48 @@
       "parameters": {
         "jsCode": "// supaya upload ulang setelah gagal di tengah tidak menulis Retur dua kali\nconst source = $('Extract Attachment Name').first().json;\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.processedRetur) staticData.processedRetur = [];\nstaticData.processedRetur.push({ key: 'retur__' + source.personelName + '__' + source.attachmentName, timestamp: Date.now() });\nreturn $input.all();"
       }
+    },
+    {
+      "id": "14a276d9-66aa-454b-af66-66e32becc534",
+      "name": "Build STOKOPNAME Format Requests",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3808,
+        576
+      ],
+      "parameters": {
+        "jsCode": "function colToIndex(col) {\n  let idx = 0;\n  for (const ch of col.toUpperCase()) idx = idx * 26 + (ch.charCodeAt(0) - 64);\n  return idx - 1;\n}\n\nconst SHEET_ID = 603479286; // STOKOPNAME\nconst cur = colToIndex($('Resolve STOKOPNAME Columns').first().json.colE);\nif (cur <= colToIndex('E')) return []; // siklus pertama, belum ada blok sebelumnya buat dicontoh\n\n// salin format (border, format tanggal, rata tengah, bold) dari blok 3 kolom sebelumnya, semua baris\nconst requests = [\n  { copyPaste: {\n      source: { sheetId: SHEET_ID, startColumnIndex: cur - 3, endColumnIndex: cur },\n      destination: { sheetId: SHEET_ID, startColumnIndex: cur, endColumnIndex: cur + 3 },\n      pasteType: 'PASTE_FORMAT' } },\n  // header tanggal baris 1 digabung 3 kolom seperti blok lain\n  { unmergeCells: { range: { sheetId: SHEET_ID, startRowIndex: 0, endRowIndex: 1, startColumnIndex: cur, endColumnIndex: cur + 3 } } },\n  { mergeCells: { range: { sheetId: SHEET_ID, startRowIndex: 0, endRowIndex: 1, startColumnIndex: cur, endColumnIndex: cur + 3 }, mergeType: 'MERGE_ALL' } },\n];\n\nreturn [{ json: { requests } }];"
+      }
+    },
+    {
+      "id": "d757b5fc-84a3-4921-b095-6808bc22dc07",
+      "name": "Apply STOKOPNAME Format",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        4032,
+        576
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ requests: $json.requests }) }}",
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jf4LEtBwHwtJwj37",
+          "name": "Google Sheets account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -1789,6 +1831,28 @@
           }
         ]
       ]
+    },
+    "Write STOKOPNAME Column Labels": {
+      "main": [
+        [
+          {
+            "node": "Build STOKOPNAME Format Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build STOKOPNAME Format Requests": {
+      "main": [
+        [
+          {
+            "node": "Apply STOKOPNAME Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -1801,7 +1865,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "errorWorkflow": "kqzx1fd1JyikkFAX"
   },
-  "versionId": "3d7890ea-34ba-4763-9948-ec30fb8d5dc2",
+  "versionId": "bc83e8b0-2085-4146-a4ec-083b4d2c4b07",
   "meta": {
     "templateCredsSetupCompleted": true,
     "aiBuilderAssisted": true,
