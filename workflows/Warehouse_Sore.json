@@ -1164,7 +1164,7 @@
     },
     {
       "parameters": {
-        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U?fields=sheets.properties(sheetId,title)",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1Q2l5wwbHg2WoeXSXwJ1u6tkkvYV18FG95GCJo2G4z5U?fields=sheets.properties(sheetId,title,gridProperties)",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleSheetsOAuth2Api",
         "options": {}
@@ -1189,7 +1189,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function colToIndex(col) {\n  let idx = 0;\n  for (const ch of col.toUpperCase()) idx = idx * 26 + (ch.charCodeAt(0) - 64);\n  return idx - 1;\n}\n\nconst sheets = $json.sheets || [];\nconst targetTitles = ['1', '2', '3', '4'];\nconst selisihCols = [6, 9, 12, 15]; // G,J,M,P (0-indexed) - kolom Selisih tiap grup siklus di sheet personel\n\nconst requests = [];\nfor (const title of targetTitles) {\n  const sheet = sheets.find(s => String(s.properties.title) === title);\n  if (!sheet) continue;\n  const sheetId = sheet.properties.sheetId;\n  for (const col of selisihCols) {\n    requests.push({\n      repeatCell: {\n        range: { sheetId, startColumnIndex: col, endColumnIndex: col + 1 },\n        cell: { userEnteredFormat: { textFormat: { bold: true } } },\n        fields: 'userEnteredFormat.textFormat.bold',\n      },\n    });\n  }\n}\n\n// STOKOPNAME: kolom Selisih tumbuh terus tiap siklus baru (G, J, M, ...), jadi bold semua\n// dari siklus pertama sampai siklus sekarang -- sekalian backfill yang lama kalau belum di-bold\nconst stokopnameSheet = sheets.find(s => String(s.properties.title) === 'STOKOPNAME');\nconst colGCurrent = $('Resolve STOKOPNAME Columns').first().json.colG;\nif (stokopnameSheet && colGCurrent) {\n  const sheetId = stokopnameSheet.properties.sheetId;\n  const firstG = 6; // kolom G, siklus pertama\n  const lastG = colToIndex(colGCurrent);\n  for (let col = firstG; col <= lastG; col += 3) {\n    requests.push({\n      repeatCell: {\n        range: { sheetId, startColumnIndex: col, endColumnIndex: col + 1 },\n        cell: { userEnteredFormat: { textFormat: { bold: true } } },\n        fields: 'userEnteredFormat.textFormat.bold',\n      },\n    });\n  }\n}\n\nreturn [{ json: { requests } }];"
+        "jsCode": "function colToIndex(col) {\n  let idx = 0;\n  for (const ch of col.toUpperCase()) idx = idx * 26 + (ch.charCodeAt(0) - 64);\n  return idx - 1;\n}\n\nconst sheets = $json.sheets || [];\nconst targetTitles = ['1', '2', '3', '4'];\nconst selisihCols = [6, 9, 12, 15]; // G,J,M,P (0-indexed) - kolom Selisih tiap grup siklus di sheet personel\n\nconst requests = [];\nfor (const title of targetTitles) {\n  const sheet = sheets.find(s => String(s.properties.title) === title);\n  if (!sheet) continue;\n  const sheetId = sheet.properties.sheetId;\n  for (const col of selisihCols) {\n    requests.push({\n      repeatCell: {\n        range: { sheetId, startColumnIndex: col, endColumnIndex: col + 1 },\n        cell: { userEnteredFormat: { textFormat: { bold: true } } },\n        fields: 'userEnteredFormat.textFormat.bold',\n      },\n    });\n  }\n}\n\n// STOKOPNAME: kolom Selisih tumbuh terus tiap siklus baru (G, J, M, ...), jadi bold semua\n// dari siklus pertama sampai siklus sekarang -- sekalian backfill yang lama kalau belum di-bold\nconst stokopnameSheet = sheets.find(s => String(s.properties.title) === 'STOKOPNAME');\nconst colGCurrent = $('Resolve STOKOPNAME Columns').first().json.colG;\nif (stokopnameSheet && colGCurrent) {\n  const sheetId = stokopnameSheet.properties.sheetId;\n  const firstG = 6; // kolom G, siklus pertama\n  const lastG = colToIndex(colGCurrent);\n\n  // blok baru bisa lewat kolom terakhir sheet -> tambah kolom dulu, kalau tidak semua langkah berikutnya gagal 'exceeds grid limits'\n  const columnCount = (stokopnameSheet.properties.gridProperties || {}).columnCount || 0;\n  if (columnCount < lastG + 1) {\n    requests.unshift({ appendDimension: { sheetId, dimension: 'COLUMNS', length: lastG + 1 - columnCount } });\n  }\n\n  for (let col = firstG; col <= lastG; col += 3) {\n    requests.push({\n      repeatCell: {\n        range: { sheetId, startColumnIndex: col, endColumnIndex: col + 1 },\n        cell: { userEnteredFormat: { textFormat: { bold: true } } },\n        fields: 'userEnteredFormat.textFormat.bold',\n      },\n    });\n  }\n}\n\nreturn [{ json: { requests } }];"
       },
       "id": "5822aa8c-9b13-4277-b38f-bb1e40184f03",
       "name": "Build Selisih Bold Requests",
@@ -1865,7 +1865,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "errorWorkflow": "kqzx1fd1JyikkFAX"
   },
-  "versionId": "bc83e8b0-2085-4146-a4ec-083b4d2c4b07",
+  "versionId": "f67e680c-5a86-4053-b0b7-93e58df23a74",
   "meta": {
     "templateCredsSetupCompleted": true,
     "aiBuilderAssisted": true,
