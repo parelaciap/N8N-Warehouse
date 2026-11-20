@@ -2009,8 +2009,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        4608,
-        1104
+        6624,
+        1300
       ],
       "id": "ceebe093-ab8e-4956-8510-5fce1f267107",
       "name": "Send Completion Email",
@@ -2450,6 +2450,288 @@
         "gmailOAuth2": {
           "id": "8U48AonBtBxubvMr",
           "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "e29c5b5a-39a9-482e-a033-183722685f07",
+      "name": "Download Pengambilan XLSX",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        4608,
+        1300
+      ],
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Copy Template Pengambilan').first().json.id }}"
+        },
+        "options": {
+          "binaryPropertyName": "data",
+          "googleFileConversion": {
+            "conversion": {
+              "sheetsToFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            }
+          }
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "id": "eac52da9-1e2e-441b-89f6-16cb5d48cfac",
+      "name": "Upload Pengambilan XLSX",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        4832,
+        1300
+      ],
+      "parameters": {
+        "inputDataFieldName": "data",
+        "name": "={{ 'Pengambilan ' + $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') + '.xlsx' }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1-n-zOK6j5My_hIBQkq7WajYBx-qgBAHD"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "id": "45bc642d-3b8f-452a-ae75-64fc76d58a4e",
+      "name": "Trash Pengambilan Sheet",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5056,
+        1300
+      ],
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Copy Template Pengambilan').first().json.id }}"
+        },
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "id": "3bbbfbd5-2102-4dec-ac76-454b16286670",
+      "name": "Download Penyiapan XLSX",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5280,
+        1300
+      ],
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Copy Template Penyiapan').first().json.id }}"
+        },
+        "options": {
+          "binaryPropertyName": "data",
+          "googleFileConversion": {
+            "conversion": {
+              "sheetsToFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            }
+          }
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "id": "5aa4cdaf-d5b8-47be-9b54-f7e774cd6dc9",
+      "name": "Upload Penyiapan XLSX",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5504,
+        1300
+      ],
+      "parameters": {
+        "inputDataFieldName": "data",
+        "name": "={{ 'Penyiapan ' + $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') + '.xlsx' }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1ZLRN2uCgSsE-zHIBh9fGyNMcqG1p4M7N"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "id": "f3fdcfbe-f9f7-43fc-a8ad-fe389240deeb",
+      "name": "Trash Penyiapan Sheet",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5728,
+        1300
+      ],
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Copy Template Penyiapan').first().json.id }}"
+        },
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "id": "dc32d6e6-c65b-44c9-b6f1-b8727ef109c2",
+      "name": "Download Telian Penyiapan XLSX",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5952,
+        1300
+      ],
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Copy Template Telian Penyiapan').first().json.id }}"
+        },
+        "options": {
+          "binaryPropertyName": "data",
+          "googleFileConversion": {
+            "conversion": {
+              "sheetsToFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            }
+          }
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "id": "306e39c3-68c9-408f-90c8-47bc55a39369",
+      "name": "Upload Telian Penyiapan XLSX",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        6176,
+        1300
+      ],
+      "parameters": {
+        "inputDataFieldName": "data",
+        "name": "={{ 'Telian Penyiapan ' + $('Gmail Trigger').first().binary.attachment_0.fileName.replace('.zip', '') + '.xlsx' }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1TsEPTlS6B0EEvwbwZj4Dvhwo_8Bgiu3y"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "id": "4301070d-77ac-4bb4-bd85-ab7c851e23fd",
+      "name": "Trash Telian Penyiapan Sheet",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        6400,
+        1300
+      ],
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Copy Template Telian Penyiapan').first().json.id }}"
+        },
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GE0qJ3jLbNoaRYmr",
+          "name": "Google Drive account"
         }
       }
     }
@@ -3440,17 +3722,6 @@
         ]
       ]
     },
-    "Log Processed Attachment": {
-      "main": [
-        [
-          {
-            "node": "Send Completion Email",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Set Active Cutoff": {
       "main": [
         [
@@ -3461,9 +3732,119 @@
           }
         ]
       ]
+    },
+    "Log Processed Attachment": {
+      "main": [
+        [
+          {
+            "node": "Download Pengambilan XLSX",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Pengambilan XLSX": {
+      "main": [
+        [
+          {
+            "node": "Upload Pengambilan XLSX",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Pengambilan XLSX": {
+      "main": [
+        [
+          {
+            "node": "Trash Pengambilan Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trash Pengambilan Sheet": {
+      "main": [
+        [
+          {
+            "node": "Download Penyiapan XLSX",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Penyiapan XLSX": {
+      "main": [
+        [
+          {
+            "node": "Upload Penyiapan XLSX",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Penyiapan XLSX": {
+      "main": [
+        [
+          {
+            "node": "Trash Penyiapan Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trash Penyiapan Sheet": {
+      "main": [
+        [
+          {
+            "node": "Download Telian Penyiapan XLSX",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Telian Penyiapan XLSX": {
+      "main": [
+        [
+          {
+            "node": "Upload Telian Penyiapan XLSX",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Telian Penyiapan XLSX": {
+      "main": [
+        [
+          {
+            "node": "Trash Telian Penyiapan Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trash Telian Penyiapan Sheet": {
+      "main": [
+        [
+          {
+            "node": "Send Completion Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -3473,7 +3854,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "errorWorkflow": "kqzx1fd1JyikkFAX"
   },
-  "versionId": "e91be31c-0472-4268-acb4-9b347dbb479b",
+  "versionId": "01c9679f-d3c2-4259-99f3-72574ef592c0",
   "meta": {
     "templateCredsSetupCompleted": true,
     "aiBuilderAssisted": true,
